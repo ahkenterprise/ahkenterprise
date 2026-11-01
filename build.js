@@ -18,16 +18,16 @@ try {
     console.log("Moving files out of nested folder...");
     const files = fs.readdirSync(nestedFolder);
     
-    // Skip these files so the new versions in GitHub are not overwritten by the zip
+    // 🔥 We only skip the files we manually created/updated in GitHub.
+    // We let index.html, logo.png, deter.js, and your app folders unzip normally!
     const skipList = [
       'netlify', 'package.json', 'netlify.toml', 'build.js', 
-      'app.js', 'index.html', 'deter.js', 'logo.png', 
-      '.git', 'node_modules'
+      'app.js', '.git', 'node_modules'
     ];
 
     for (const file of files) {
       if (skipList.includes(file)) {
-        console.log(`Skipping ${file}`);
+        console.log(`Skipping ${file} (using the GitHub version)`);
         continue; 
       }
       const src = path.join(nestedFolder, file);
