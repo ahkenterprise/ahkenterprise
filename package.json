@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "unzip -o \"AHK APP WORLD.zip\" -d . && mv \"AHK APP WORLD\"/* . && rm -rf \"AHK APP WORLD\""
+    "build": "node -e \"const AdmZip = require('adm-zip'); new AdmZip('AHK APP WORLD.zip').extractAllTo('.', true); const fs = require('fs'); const path = require('path'); const dir = './AHK APP WORLD'; if (fs.existsSync(dir)) { fs.readdirSync(dir).forEach(file => { fs.renameSync(path.join(dir, file), path.join('.', file)); }); fs.rmSync(dir, { recursive: true, force: true }); }\""
   },
   "dependencies": {
-    "firebase-admin": "^12.6.0"
+    "firebase-admin": "^12.6.0",
+    "adm-zip": "^0.5.10"
   }
 }
