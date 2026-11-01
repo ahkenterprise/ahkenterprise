@@ -49,7 +49,8 @@ async function callAdmin(action, payload = {}) {
   try { data = await res.json(); } catch {}
   
   if (!res.ok) {
-    const e = new Error(data.error || `Request failed (${res.status})`);
+    // If the server gives a specific error message, use it. Otherwise show the status.
+    const e = new Error(data.error || `Server Error (Status: ${res.status})`);
     e.status = res.status;
     throw e;
   }
@@ -87,14 +88,18 @@ async function handleAuthState(user) {
   $('authSection').style.display = 'none';
 
   try {
+    // 1. Ask the backend if this user is allowed
     await callAdmin('whoami'); 
+    // 2. If yes, show the panel
     showAdminPanel(user);
   } catch (e) {
     await auth.signOut().catch(() => {});
     showLoginScreen();
     const el = $('authError');
-    // 🔥 THIS SHOWS THE EXACT ERROR ON SCREEN
-    el.textContent = e.message || 'Access denied.';
+    
+    // 🔥 THIS LINE SHOWS THE EXACT REASON FOR THE ERROR
+    el.textContent = e.message; 
+    
     el.style.display = 'block';
   }
 }
