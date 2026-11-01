@@ -10,7 +10,6 @@ try {
     throw new Error("Zip file not found: " + zipFilePath);
   }
 
-  console.log("Extracting zip...");
   const zip = new AdmZip(zipFilePath);
   zip.extractAllTo('.', true);
 
@@ -19,31 +18,26 @@ try {
     console.log("Moving files out of nested folder...");
     const files = fs.readdirSync(nestedFolder);
     
-    // These are files we ALREADY set up correctly in the root. We will skip them.
-    const skipList = ['netlify', 'package.json', 'netlify.toml', 'build.js', '.git', 'node_modules'];
+    // Skip these files so the new versions in GitHub are not overwritten by the zip
+    const skipList = [
+      'netlify', 'package.json', 'netlify.toml', 'build.js', 
+      'app.js', 'index.html', 'deter.js', 'logo.png', 
+      '.git', 'node_modules'
+    ];
 
     for (const file of files) {
       if (skipList.includes(file)) {
-        console.log(`Skipping ${file} (using the root version instead).`);
+        console.log(`Skipping ${file}`);
         continue; 
       }
-      
       const src = path.join(nestedFolder, file);
       const dest = path.join('.', file);
-      
-      // If destination exists, remove it first to avoid errors
-      if (fs.existsSync(dest)) {
-        fs.rmSync(dest, { recursive: true, force: true });
-      }
-      
+      if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
       fs.renameSync(src, dest);
     }
-    
-    // Clean up the nested folder
     fs.rmSync(nestedFolder, { recursive: true, force: true });
   }
-  
-  console.log("Build step completed successfully.");
+  console.log("Build successful.");
 } catch (error) {
   console.error("Build failed:", error);
   process.exit(1);
