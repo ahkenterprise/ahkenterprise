@@ -10,7 +10,6 @@ if (!admin.apps.length) {
   });
 }
 
-// .trim() removes accidental spaces, .toLowerCase() ensures case doesn't matter
 const SUPERADMIN_EMAIL = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase();
 
 exports.handler = async (event) => {
@@ -27,9 +26,18 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ error: 'Invalid token' }) };
   }
 
-  const email = (decoded.email || '').trim().toLowerCase();
+  // 🔥 Try to find the email in every possible place Google might put it
+  let rawEmail = decoded.email;
+  if (!rawEmail && decoded.firebase?.identities?.email) {
+    rawEmail = decoded.firebase.identities.email[0];
+  }
+  if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
+    const provider = decoded.providerData.find(p => p.email);
+    if (provider) rawEmail = provider.email;
+  }
+
+  const email = (rawEmail || '').trim().toLowerCase();
   
-  // 🔥 Check if they match and show exactly what Netlify sees
   if (email !== SUPERADMIN_EMAIL) {
     return { 
       statusCode: 403, 
