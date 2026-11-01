@@ -1,0 +1,10 @@
+[build]
+  command   = "npm run build"
+  publish   = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from   = "/open-app"
+  to     = "/.netlify/functions/open-app"
+  status = 200
+  force  = true
