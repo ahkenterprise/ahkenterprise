@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "unzip \"AHK APP WORLD.zip\" -d ."
+    "build": "unzip -o \"AHK APP WORLD.zip\" -d . && mv \"AHK APP WORLD\"/* . && rm -rf \"AHK APP WORLD\""
   },
   "dependencies": {
     "firebase-admin": "^12.6.0"
