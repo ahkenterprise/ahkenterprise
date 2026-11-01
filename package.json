@@ -1,0 +1,11 @@
+{
+  "name": "ahk-enterprise",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "unzip \"AHK APP WORLD.zip\" -d ."
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
+  }
+}
