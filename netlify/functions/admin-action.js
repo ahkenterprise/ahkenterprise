@@ -29,12 +29,12 @@ exports.handler = async (event) => {
 
   const email = (decoded.email || '').trim().toLowerCase();
   
-  // 🔥 Check if they match
+  // 🔥 Check if they match and show exactly what Netlify sees
   if (email !== SUPERADMIN_EMAIL) {
     return { 
       statusCode: 403, 
       body: JSON.stringify({ 
-        error: `Access Denied: Google Account [${email}] does not match Netlify Variable [${SUPERADMIN_EMAIL}]` 
+        error: `Access Denied!\n\nGoogle Account: [${email}]\nNetlify Variable: [${SUPERADMIN_EMAIL}]` 
       }) 
     };
   }
