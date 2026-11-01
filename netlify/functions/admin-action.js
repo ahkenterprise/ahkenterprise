@@ -26,17 +26,21 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ error: 'Invalid token' }) };
   }
 
-  // Look for email in the token first
+  // 🔥 Check 4 different places for the email
   let rawEmail = decoded.email;
   
-  // 🔥 FOOLPROOF FALLBACK: If the token is empty, look up the user by their UID!
+  if (!rawEmail && decoded.firebase?.identities?.email) {
+    rawEmail = decoded.firebase.identities.email[0];
+  }
+  if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
+    const p = decoded.providerData.find(p => p.email);
+    if (p) rawEmail = p.email;
+  }
   if (!rawEmail && decoded.uid) {
     try {
       const userRecord = await admin.auth().getUser(decoded.uid);
       rawEmail = userRecord.email;
-    } catch (err) {
-      console.error("Lookup failed:", err);
-    }
+    } catch (err) {}
   }
 
   const email = (rawEmail || '').trim().toLowerCase();
