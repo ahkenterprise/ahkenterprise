@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+.import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup,
   onAuthStateChanged, signOut as fbSignOut,
@@ -29,7 +29,8 @@ if (isConfigured) {
   provider = new GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
-  provider.setCustomParameters({ prompt: 'select_account' });
+  // 🔥 Forces Google to show the consent screen every time
+  provider.setCustomParameters({ prompt: 'consent select_account' });
 }
 
 const $ = id => document.getElementById(id);
@@ -49,7 +50,6 @@ async function callAdmin(action, payload = {}) {
   try { data = await res.json(); } catch {}
   
   if (!res.ok) {
-    // If the server gives a specific error message, use it. Otherwise show the status.
     const e = new Error(data.error || `Server Error (Status: ${res.status})`);
     e.status = res.status;
     throw e;
@@ -88,18 +88,13 @@ async function handleAuthState(user) {
   $('authSection').style.display = 'none';
 
   try {
-    // 1. Ask the backend if this user is allowed
     await callAdmin('whoami'); 
-    // 2. If yes, show the panel
     showAdminPanel(user);
   } catch (e) {
     await auth.signOut().catch(() => {});
     showLoginScreen();
     const el = $('authError');
-    
-    // 🔥 THIS LINE SHOWS THE EXACT REASON FOR THE ERROR
     el.textContent = e.message; 
-    
     el.style.display = 'block';
   }
 }
@@ -126,7 +121,6 @@ function searchAndOpenApp() {
   window.location.href = `${OPEN_FN_URL}?name=${encodeURIComponent(name)}`;
 }
 
-// Wire up UI
 const optionsModal = $('optionsModal');
 const adminModal   = $('adminModal');
 
