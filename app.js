@@ -29,7 +29,6 @@ if (isConfigured) {
   provider = new GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
-  // Forces Google to ask for email sharing every time
   provider.setCustomParameters({ prompt: 'consent select_account' });
 }
 
@@ -57,6 +56,9 @@ async function callAdmin(action, payload = {}) {
   return data;
 }
 
+let adminAppsCache = [];
+let refreshTimer = null;
+
 function showLoginScreen() {
   $('authLoading').style.display         = 'none';
   $('authSection').style.display         = 'block';
@@ -79,6 +81,10 @@ function showAdminPanel(user) {
   $('adminEmailDisplay').textContent = user.email || 'Admin';
 
   $('adminModal').style.display = 'flex';
+  
+  refreshAdminList();
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(refreshAdminList, 5000);
 }
 
 async function handleAuthState(user) {
@@ -99,6 +105,147 @@ async function handleAuthState(user) {
   }
 }
 
+async function refreshAdminList() {
+  try {
+    const data = await callAdmin('list');
+    adminAppsCache = data.apps || [];
+    renderAdminList();
+  } catch (e) {
+    console.warn('List refresh failed:', e.message);
+  }
+}
+
+function renderAdminList() {
+  const list = $('adminLinksList');
+  list.innerHTML = '';
+
+  if (!adminAppsCache.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = 'No apps yet. Click "Seed Default Apps" below.';
+    list.appendChild(empty);
+    $('seedBtn').style.display = 'block';
+    return;
+  }
+  $('seedBtn').style.display = 'none';
+
+  adminAppsCache.forEach(link => {
+    const item = document.createElement('div');
+    item.className = 'admin-link-item' + (link.visible ? '' : ' hidden-link');
+
+    const info = document.createElement('div');
+    info.className = 'admin-link-info';
+    const strong = document.createElement('strong');
+    strong.textContent = link.name;
+    const small = document.createElement('small');
+    small.textContent = link.visible ? '● Visible' : '○ Hidden';
+    info.append(strong, small);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'action-btn edit-btn';
+    editBtn.textContent = '✏️';
+    editBtn.title = 'Edit URL';
+    editBtn.addEventListener('click', () => handleEditUrl(link));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'action-btn ' + (link.visible ? 'toggle-btn' : 'toggle-btn is-hidden');
+    toggleBtn.textContent = link.visible ? '👁️' : '🙈';
+    toggleBtn.title = link.visible ? 'Hide' : 'Show';
+    toggleBtn.addEventListener('click', () => handleToggle(link));
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'action-btn delete-btn';
+    delBtn.textContent = '🗑️';
+    delBtn.title = 'Delete';
+    delBtn.addEventListener('click', () => handleDelete(link));
+
+    item.append(info, editBtn, toggleBtn, delBtn);
+    list.appendChild(item);
+  });
+}
+
+async function handleEditUrl(link) {
+  try {
+    const r = await callAdmin('get-url', { id: link.id });
+    const currentUrl = r.url || '';
+    const newUrl = prompt(`Edit URL for "${link.name}":`, currentUrl);
+    if (newUrl === null) return;
+    const trimmed = newUrl.trim();
+    if (!trimmed || trimmed === currentUrl) return;
+
+    await callAdmin('update-url', { id: link.id, url: trimmed });
+    refreshAdminList();
+  } catch (e) { alert("Failed to update URL: " + e.message); }
+}
+
+async function handleToggle(link) {
+  try {
+    await callAdmin('toggle', { id: link.id, visible: !link.visible });
+    refreshAdminList();
+  } catch (e) { alert("Failed to update: " + e.message); }
+}
+
+async function handleDelete(link) {
+  if (!confirm(`Remove "${link.name}" from the list?`)) return;
+  try {
+    await callAdmin('delete', { id: link.id });
+    refreshAdminList();
+  } catch (e) { alert("Failed to delete: " + e.message); }
+}
+
+async function handleAdd() {
+  const name = $('newLinkName').value.trim();
+  const url  = $('newLinkUrl').value.trim();
+  if (!name || !url) return alert("Please fill in both fields.");
+  
+  const btn = $('addLinkBtn');
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Adding...';
+  
+  try {
+    await callAdmin('add', { name, url });
+    $('newLinkName').value = '';
+    $('newLinkUrl').value  = '';
+    refreshAdminList();
+  } catch (e) {
+    alert("Failed to add: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = original;
+  }
+}
+
+async function handleReset() {
+  if (!confirm("Reset all apps to defaults? This cannot be undone.")) return;
+  const btn = $('resetBtn');
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Resetting...';
+  
+  try {
+    await callAdmin('reset');
+    refreshAdminList();
+  } catch (e) { alert("Reset failed: " + e.message); }
+  finally { btn.disabled = false; btn.textContent = original; }
+}
+
+async function handleSeed() {
+  const btn = $('seedBtn');
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Seeding...';
+  
+  try {
+    await callAdmin('seed');
+    refreshAdminList();
+  } catch (e) { alert("Seed failed: " + e.message); }
+  finally { btn.disabled = false; btn.textContent = original; }
+}
+
+async function handleLogout() {
+  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+  try { await auth.signOut(); } catch {}
+  showLoginScreen();
+  $('adminModal').style.display = 'none';
+}
+
 async function handleGoogleSignIn() {
   $('authError').style.display   = 'none';
   $('authSection').style.display = 'none';
@@ -112,6 +259,21 @@ async function handleGoogleSignIn() {
     const el = $('authError');
     el.textContent = e.message || "Sign-in failed.";
     el.style.display = 'block';
+  }
+}
+
+async function testSecureApi() {
+  const btn = $('testApiBtn');
+  const original = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Testing...';
+  
+  try {
+    const data = await callAdmin('test');
+    alert(`✅ Backend reachable\n\nMessage: ${data.message}`);
+  } catch (e) {
+    alert(`❌ Backend failed: ${e.message}`);
+  } finally {
+    btn.disabled = false; btn.textContent = original;
   }
 }
 
@@ -133,6 +295,11 @@ $('closeOptions').addEventListener('click', () => optionsModal.style.display = '
 $('closeAdmin').addEventListener('click', () => adminModal.style.display = 'none');
 $('searchOpenBtn').addEventListener('click', searchAndOpenApp);
 $('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
+$('addLinkBtn').addEventListener('click', handleAdd);
+$('resetBtn').addEventListener('click', handleReset);
+$('seedBtn').addEventListener('click', handleSeed);
+$('logoutBtn').addEventListener('click', handleLogout);
+$('testApiBtn').addEventListener('click', testSecureApi);
 
 let tapCount = 0, tapTimer;
 $('secretLogo').addEventListener('click', () => {
