@@ -2,18 +2,23 @@ const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
   try {
-    // 🔥 Safely format the private key (replaces literal \n with real newlines)
-    const privateKey = (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+      throw new Error("Missing FIREBASE_SERVICE_ACCOUNT in Netlify");
+    }
     
+    // Parse the whole JSON file
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    
+    // Automatically fix the private key newlines just in case
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
+
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: privateKey
-      })
+      credential: admin.credential.cert(serviceAccount)
     });
   } catch (error) {
-    console.error("FIREBASE INIT ERROR:", error.message);
+    console.error("INITIALIZATION FAILED:", error.message);
   }
 }
 
@@ -31,14 +36,13 @@ const DEFAULT_APPS = [
 ];
 
 exports.handler = async (event, context) => {
-  // 🔥 CRITICAL FIX FOR NETLIFY TIMEOUTS (Prevents 502 Bad Gateway)
+  // Prevents Netlify timeout errors
   context.callbackWaitsForEmptyEventLoop = false;
 
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
-  // Check if Firebase initialized properly
   if (!admin.apps.length) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Server Config Error: Firebase did not initialize. Check your env variables.' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Server Config Error: Firebase did not initialize. Check FIREBASE_SERVICE_ACCOUNT.' }) };
   }
 
   const authHeader = event.headers.authorization || event.headers.Authorization || '';
@@ -84,11 +88,8 @@ exports.handler = async (event, context) => {
     const col = db.collection(APP_COLLECTION);
 
     switch (action) {
-      case 'whoami': 
-        return { statusCode: 200, body: JSON.stringify({ ok: true, email }) };
-      
-      case 'test':   
-        return { statusCode: 200, body: JSON.stringify({ message: 'Secure backend online', email }) };
+      case 'whoami': return { statusCode: 200, body: JSON.stringify({ ok: true, email }) };
+      case 'test':   return { statusCode: 200, body: JSON.stringify({ message: 'Secure backend online', email }) };
 
       case 'list': {
         const snap = await col.get();
