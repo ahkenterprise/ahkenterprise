@@ -2,22 +2,15 @@ const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
   try {
-    // 1. Get the JSON string from Netlify
-    const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (!serviceAccountString) {
-      throw new Error("Missing FIREBASE_SERVICE_ACCOUNT environment variable.");
-    }
+    // 🔥 Safely format the private key (replaces literal \n with real newlines)
+    const privateKey = (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
     
-    // 2. Parse it safely
-    const serviceAccount = JSON.parse(serviceAccountString);
-    
-    // 3. Fix the newlines in the private key just in case Netlify broke them
-    if (serviceAccount.private_key) {
-      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-    }
-
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: privateKey
+      })
     });
   } catch (error) {
     console.error("FIREBASE INIT ERROR:", error.message);
@@ -26,16 +19,26 @@ if (!admin.apps.length) {
 
 const SUPERADMIN_EMAIL = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase();
 const SUPERADMIN_UID = (process.env.SUPERADMIN_UID || '').trim();
+const APP_COLLECTION = 'apps';
+
+const DEFAULT_APPS = [
+  { name: 'Cup N Care',         url: 'cupncare/index.html',  visible: true },
+  { name: 'AHK Wellness',       url: 'ahk/index.html',       visible: true },
+  { name: 'Abdul Hameed Kunhi', url: 'ahk/index.html',       visible: true },
+  { name: 'Mi Gym App',         url: 'migym/index.html',     visible: true },
+  { name: 'Profile Mi',         url: 'profilemi/index.html', visible: true },
+  { name: 'AHK Book World',     url: 'ahkbookworld/index.html', visible: true }
+];
 
 exports.handler = async (event, context) => {
-  // 🔥 CRITICAL FIX FOR NETLIFY TIMEOUTS (502 ERRORS)
+  // 🔥 CRITICAL FIX FOR NETLIFY TIMEOUTS (Prevents 502 Bad Gateway)
   context.callbackWaitsForEmptyEventLoop = false;
 
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
   // Check if Firebase initialized properly
   if (!admin.apps.length) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Server Config Error: Firebase did not initialize. Check JSON formatting.' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Server Config Error: Firebase did not initialize. Check your env variables.' }) };
   }
 
   const authHeader = event.headers.authorization || event.headers.Authorization || '';
@@ -49,7 +52,21 @@ exports.handler = async (event, context) => {
     return { statusCode: 401, body: JSON.stringify({ error: `Token Error: ${e.message}` }) };
   }
 
-  const email = (decoded.email || '').toLowerCase();
+  // --- AUTHENTICATION CHECK ---
+  let rawEmail = decoded.email;
+  if (!rawEmail && decoded.firebase?.identities?.email) rawEmail = decoded.firebase.identities.email[0];
+  if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
+    const p = decoded.providerData.find(p => p.email);
+    if (p) rawEmail = p.email;
+  }
+  if (!rawEmail && decoded.uid) {
+    try {
+      const userRecord = await admin.auth().getUser(decoded.uid);
+      rawEmail = userRecord.email;
+    } catch (err) {}
+  }
+
+  const email = (rawEmail || '').trim().toLowerCase();
   const isAuthorizedByEmail = email && email === SUPERADMIN_EMAIL;
   const isAuthorizedByUid = SUPERADMIN_UID && decoded.uid === SUPERADMIN_UID;
 
@@ -64,28 +81,75 @@ exports.handler = async (event, context) => {
   
   try {
     const db  = admin.firestore();
-    const col = db.collection('apps');
+    const col = db.collection(APP_COLLECTION);
 
     switch (action) {
-      case 'whoami': return { statusCode: 200, body: JSON.stringify({ ok: true, email }) };
+      case 'whoami': 
+        return { statusCode: 200, body: JSON.stringify({ ok: true, email }) };
+      
+      case 'test':   
+        return { statusCode: 200, body: JSON.stringify({ message: 'Secure backend online', email }) };
+
       case 'list': {
         const snap = await col.get();
-        const apps = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                             .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        const apps = snap.docs.map(d => {
+          const x = d.data();
+          return { id: d.id, name: x.name || '', visible: !!x.visible, hasUrl: !!x.url, createdAt: x.createdAt || 0 };
+        }).sort((a, b) => a.createdAt - b.createdAt);
         return { statusCode: 200, body: JSON.stringify({ apps }) };
       }
+
+      case 'get-url': {
+        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
+        const doc = await col.doc(body.id).get();
+        if (!doc.exists) return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
+        return { statusCode: 200, body: JSON.stringify({ url: doc.data().url || '' }) };
+      }
+
+      case 'update-url': {
+        if (!body.id || !body.url) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id or url' }) };
+        await col.doc(body.id).update({ url: body.url.trim() });
+        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      }
+
       case 'add': {
-        const ref = await col.add({ name: body.name, url: body.url, visible: true, createdAt: Date.now() });
+        const name = String(body.name || '').trim();
+        const url  = String(body.url  || '').trim();
+        if (!name || !url) return { statusCode: 400, body: JSON.stringify({ error: 'Missing name or url' }) };
+        const ref = await col.add({ name, url, visible: true, createdAt: Date.now() });
         return { statusCode: 200, body: JSON.stringify({ ok: true, id: ref.id }) };
       }
+
+      case 'toggle': {
+        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
+        await col.doc(body.id).update({ visible: !!body.visible });
+        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      }
+
       case 'delete': {
+        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
         await col.doc(body.id).delete();
         return { statusCode: 200, body: JSON.stringify({ ok: true }) };
       }
-      // Add other actions (edit, toggle) here as needed...
+
+      case 'reset': {
+        const snap  = await col.get();
+        const batch = db.batch();
+        snap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        for (const a of DEFAULT_APPS) await col.add({ ...a, createdAt: Date.now() });
+        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      }
+
+      case 'seed': {
+        for (const a of DEFAULT_APPS) await col.add({ ...a, createdAt: Date.now() });
+        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      }
+
       default: return { statusCode: 400, body: JSON.stringify({ error: 'Unknown action' }) };
     }
   } catch (e) {
+    console.error("Database error:", e); 
     return { statusCode: 500, body: JSON.stringify({ error: 'Database error: ' + e.message }) };
   }
 };
