@@ -11,6 +11,7 @@ if (!admin.apps.length) {
 }
 
 const SUPERADMIN_EMAIL = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase();
+const SUPERADMIN_UID = (process.env.SUPERADMIN_UID || '').trim();
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
@@ -26,12 +27,9 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ error: 'Invalid token' }) };
   }
 
-  // 🔥 Check 4 different places for the email
+  // Try to find the email (even if Google hides it)
   let rawEmail = decoded.email;
-  
-  if (!rawEmail && decoded.firebase?.identities?.email) {
-    rawEmail = decoded.firebase.identities.email[0];
-  }
+  if (!rawEmail && decoded.firebase?.identities?.email) rawEmail = decoded.firebase.identities.email[0];
   if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
     const p = decoded.providerData.find(p => p.email);
     if (p) rawEmail = p.email;
@@ -45,15 +43,21 @@ exports.handler = async (event) => {
 
   const email = (rawEmail || '').trim().toLowerCase();
   
-  if (email !== SUPERADMIN_EMAIL) {
+  // 🔥 SECURE CHECK: Matches either the UID or the Email stored in Netlify
+  const isAuthorizedByEmail = email && email === SUPERADMIN_EMAIL;
+  const isAuthorizedByUid = SUPERADMIN_UID && decoded.uid === SUPERADMIN_UID;
+
+  if (!isAuthorizedByEmail && !isAuthorizedByUid) {
+    // ❌ GENERIC ERROR: Does not reveal your email or UID to hackers!
     return { 
       statusCode: 403, 
       body: JSON.stringify({ 
-        error: `Access Denied!\n\nGoogle Account: [${email}]\nNetlify Variable: [${SUPERADMIN_EMAIL}]` 
+        error: 'Access denied. This account is not authorized.' 
       }) 
     };
   }
 
+  // ✅ SUCCESS
   return { 
     statusCode: 200, 
     headers: { 'Content-Type': 'application/json' },
