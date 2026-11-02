@@ -2,7 +2,6 @@ const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
   try {
-    // 🔥 Reads the entire JSON file from the Netlify variable
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
@@ -16,15 +15,6 @@ const SUPERADMIN_EMAIL = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase
 const SUPERADMIN_UID = (process.env.SUPERADMIN_UID || '').trim();
 const APP_COLLECTION = 'apps';
 
-const DEFAULT_APPS = [
-  { name: 'Cup N Care',         url: 'cupncare/index.html',  visible: true },
-  { name: 'AHK Wellness',       url: 'ahk/index.html',       visible: true },
-  { name: 'Abdul Hameed Kunhi', url: 'ahk/index.html',       visible: true },
-  { name: 'Mi Gym App',         url: 'migym/index.html',     visible: true },
-  { name: 'Profile Mi',         url: 'profilemi/index.html', visible: true },
-  { name: 'AHK Book World',     url: 'ahkbookworld/index.html', visible: true }
-];
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
@@ -34,12 +24,13 @@ exports.handler = async (event) => {
 
   let decoded;
   try {
+    // 🔥 We removed the 'true' check and are showing the exact error if it fails
     decoded = await admin.auth().verifyIdToken(m[1]);
   } catch (e) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Invalid token' }) };
+    return { statusCode: 401, body: JSON.stringify({ error: `Token Error: ${e.message}` }) };
   }
 
-  // --- AUTHENTICATION CHECK ---
+  // Try to find the email
   let rawEmail = decoded.email;
   if (!rawEmail && decoded.firebase?.identities?.email) rawEmail = decoded.firebase.identities.email[0];
   if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
@@ -58,81 +49,13 @@ exports.handler = async (event) => {
   const isAuthorizedByUid = SUPERADMIN_UID && decoded.uid === SUPERADMIN_UID;
 
   if (!isAuthorizedByEmail && !isAuthorizedByUid) {
-    return { statusCode: 403, body: JSON.stringify({ error: 'Access denied. This account is not authorized.' }) };
+    return { statusCode: 403, body: JSON.stringify({ error: 'Access denied.' }) };
   }
 
-  // --- DATABASE ACTIONS ---
-  let body = {};
-  try { body = JSON.parse(event.body || '{}'); } catch {}
-  const { action } = body;
-  const db  = admin.firestore();
-  const col = db.collection(APP_COLLECTION);
-
-  try {
-    switch (action) {
-      case 'whoami': return { statusCode: 200, body: JSON.stringify({ ok: true, email }) };
-      case 'test':   return { statusCode: 200, body: JSON.stringify({ message: 'Secure backend online', email }) };
-
-      case 'list': {
-        const snap = await col.get();
-        const apps = snap.docs.map(d => {
-          const x = d.data();
-          return { id: d.id, name: x.name || '', visible: !!x.visible, hasUrl: !!x.url, createdAt: x.createdAt || 0 };
-        }).sort((a, b) => a.createdAt - b.createdAt);
-        return { statusCode: 200, body: JSON.stringify({ apps }) };
-      }
-
-      case 'get-url': {
-        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
-        const doc = await col.doc(body.id).get();
-        if (!doc.exists) return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
-        return { statusCode: 200, body: JSON.stringify({ url: doc.data().url || '' }) };
-      }
-
-      case 'update-url': {
-        if (!body.id || !body.url) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id or url' }) };
-        await col.doc(body.id).update({ url: body.url.trim() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-      }
-
-      case 'add': {
-        const name = String(body.name || '').trim();
-        const url  = String(body.url  || '').trim();
-        if (!name || !url) return { statusCode: 400, body: JSON.stringify({ error: 'Missing name or url' }) };
-        const ref = await col.add({ name, url, visible: true, createdAt: Date.now() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true, id: ref.id }) };
-      }
-
-      case 'toggle': {
-        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
-        await col.doc(body.id).update({ visible: !!body.visible });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-      }
-
-      case 'delete': {
-        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
-        await col.doc(body.id).delete();
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-      }
-
-      case 'reset': {
-        const snap  = await col.get();
-        const batch = db.batch();
-        snap.docs.forEach(d => batch.delete(d.ref));
-        await batch.commit();
-        for (const a of DEFAULT_APPS) await col.add({ ...a, createdAt: Date.now() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-      }
-
-      case 'seed': {
-        for (const a of DEFAULT_APPS) await col.add({ ...a, createdAt: Date.now() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-      }
-
-      default: return { statusCode: 400, body: JSON.stringify({ error: 'Unknown action' }) };
-    }
-  } catch (e) {
-    console.error("Database error:", e); // This will print the exact error to Netlify logs if it fails
-    return { statusCode: 500, body: JSON.stringify({ error: 'Internal error' }) };
-  }
+  // Handle basic action request
+  return { 
+    statusCode: 200, 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ok: true, message: 'Welcome Admin', email }) 
+  };
 };
