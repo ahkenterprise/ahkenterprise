@@ -1,13 +1,15 @@
 const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId:   process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
-    })
-  });
+  try {
+    // 🔥 Reads the entire JSON file from the Netlify variable
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+  } catch (error) {
+    console.error("Error parsing Firebase credentials", error);
+  }
 }
 
 const SUPERADMIN_EMAIL = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase();
@@ -37,7 +39,7 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ error: 'Invalid token' }) };
   }
 
-  // 🔥 AUTHENTICATION CHECK
+  // --- AUTHENTICATION CHECK ---
   let rawEmail = decoded.email;
   if (!rawEmail && decoded.firebase?.identities?.email) rawEmail = decoded.firebase.identities.email[0];
   if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
@@ -130,7 +132,7 @@ exports.handler = async (event) => {
       default: return { statusCode: 400, body: JSON.stringify({ error: 'Unknown action' }) };
     }
   } catch (e) {
-    console.error(e);
+    console.error("Database error:", e); // This will print the exact error to Netlify logs if it fails
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal error' }) };
   }
 };
