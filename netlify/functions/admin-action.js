@@ -5,11 +5,9 @@ if (!admin.apps.length) {
     if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
       throw new Error("Missing FIREBASE_SERVICE_ACCOUNT in Netlify");
     }
-    
-    // Parse the whole JSON file
+
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    
-    // Automatically fix the private key newlines just in case
+
     if (serviceAccount.private_key) {
       serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
     }
@@ -23,114 +21,142 @@ if (!admin.apps.length) {
 }
 
 const SUPERADMIN_EMAIL = (process.env.SUPERADMIN_EMAIL || '').trim().toLowerCase();
-const SUPERADMIN_UID = (process.env.SUPERADMIN_UID || '').trim();
-const APP_COLLECTION = 'apps';
+const SUPERADMIN_UID   = (process.env.SUPERADMIN_UID   || '').trim();
+const APP_COLLECTION   = 'apps';
 
 const DEFAULT_APPS = [
-  { name: 'Cup N Care',         url: 'cupncare/index.html',  visible: true },
-  { name: 'AHK Wellness',       url: 'ahk/index.html',       visible: true },
-  { name: 'Abdul Hameed Kunhi', url: 'ahk/index.html',       visible: true },
-  { name: 'Mi Gym App',         url: 'migym/index.html',     visible: true },
-  { name: 'Profile Mi',         url: 'profilemi/index.html', visible: true },
+  { name: 'Cup N Care',         url: 'cupncare/index.html',     visible: true },
+  { name: 'AHK Wellness',       url: 'ahk/index.html',          visible: true },
+  { name: 'Abdul Hameed Kunhi', url: 'ahk/index.html',          visible: true },
+  { name: 'Mi Gym App',         url: 'migym/index.html',        visible: true },
+  { name: 'Profile Mi',         url: 'profilemi/index.html',    visible: true },
   { name: 'AHK Book World',     url: 'ahkbookworld/index.html', visible: true }
 ];
 
+function json(statusCode, payload) {
+  return {
+    statusCode,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store'
+    },
+    body: JSON.stringify(payload)
+  };
+}
+
 exports.handler = async (event, context) => {
-  // Prevents Netlify timeout errors
   context.callbackWaitsForEmptyEventLoop = false;
 
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
+  if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
 
   if (!admin.apps.length) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Server Config Error: Firebase did not initialize. Check FIREBASE_SERVICE_ACCOUNT.' }) };
+    return json(500, { error: 'Server Config Error: Firebase did not initialize. Check FIREBASE_SERVICE_ACCOUNT.' });
   }
 
   const authHeader = event.headers.authorization || event.headers.Authorization || '';
   const m = authHeader.match(/^Bearer (.+)$/);
-  if (!m) return { statusCode: 401, body: JSON.stringify({ error: 'Missing Auth Header' }) };
+  if (!m) return json(401, { error: 'Missing Auth Header' });
 
   let decoded;
   try {
     decoded = await admin.auth().verifyIdToken(m[1]);
   } catch (e) {
-    return { statusCode: 401, body: JSON.stringify({ error: `Token Error: ${e.message}` }) };
+    return json(401, { error: `Token Error: ${e.message}` });
   }
 
-  // --- AUTHENTICATION CHECK ---
+  // --- Resolve email (fallbacks) ---
   let rawEmail = decoded.email;
   if (!rawEmail && decoded.firebase?.identities?.email) rawEmail = decoded.firebase.identities.email[0];
   if (!rawEmail && decoded.providerData && decoded.providerData.length > 0) {
-    const p = decoded.providerData.find(p => p.email);
+    const p = decoded.providerData.find(x => x.email);
     if (p) rawEmail = p.email;
   }
   if (!rawEmail && decoded.uid) {
     try {
       const userRecord = await admin.auth().getUser(decoded.uid);
       rawEmail = userRecord.email;
-    } catch (err) {}
+    } catch (_) {}
   }
 
-  const email = (rawEmail || '').trim().toLowerCase();
+  const email              = (rawEmail || '').trim().toLowerCase();
   const isAuthorizedByEmail = email && email === SUPERADMIN_EMAIL;
-  const isAuthorizedByUid = SUPERADMIN_UID && decoded.uid === SUPERADMIN_UID;
+  const isAuthorizedByUid   = SUPERADMIN_UID && decoded.uid === SUPERADMIN_UID;
 
   if (!isAuthorizedByEmail && !isAuthorizedByUid) {
-    return { statusCode: 403, body: JSON.stringify({ error: 'Access denied. This account is not authorized.' }) };
+    return json(403, { error: 'Access denied. This account is not authorized.' });
   }
 
-  // --- DATABASE ACTIONS ---
+  // --- Parse body ---
   let body = {};
   try { body = JSON.parse(event.body || '{}'); } catch {}
   const { action } = body;
-  
+
   try {
     const db  = admin.firestore();
     const col = db.collection(APP_COLLECTION);
 
     switch (action) {
-      case 'whoami': return { statusCode: 200, body: JSON.stringify({ ok: true, email }) };
-      case 'test':   return { statusCode: 200, body: JSON.stringify({ message: 'Secure backend online', email }) };
+      case 'whoami':
+        return json(200, { ok: true, email });
+
+      case 'test':
+        return json(200, { message: 'Secure backend online', email });
 
       case 'list': {
         const snap = await col.get();
-        const apps = snap.docs.map(d => {
-          const x = d.data();
-          return { id: d.id, name: x.name || '', visible: !!x.visible, hasUrl: !!x.url, createdAt: x.createdAt || 0 };
-        }).sort((a, b) => a.createdAt - b.createdAt);
-        return { statusCode: 200, body: JSON.stringify({ apps }) };
+        const apps = snap.docs
+          .map(d => {
+            const x = d.data();
+            return {
+              id: d.id,
+              name: x.name || '',
+              visible: !!x.visible,
+              hasUrl: !!x.url,
+              createdAt: x.createdAt || 0
+            };
+          })
+          .sort((a, b) => a.createdAt - b.createdAt);
+        return json(200, { apps });
       }
 
       case 'get-url': {
-        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
+        if (!body.id) return json(400, { error: 'Missing id' });
         const doc = await col.doc(body.id).get();
-        if (!doc.exists) return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
-        return { statusCode: 200, body: JSON.stringify({ url: doc.data().url || '' }) };
+        if (!doc.exists) return json(404, { error: 'Not found' });
+        return json(200, { url: doc.data().url || '' });
       }
 
       case 'update-url': {
-        if (!body.id || !body.url) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id or url' }) };
-        await col.doc(body.id).update({ url: body.url.trim() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        const url = String(body.url || '').trim();
+        if (!body.id || !url) return json(400, { error: 'Missing id or url' });
+        await col.doc(body.id).update({ url });
+        return json(200, { ok: true });
       }
 
       case 'add': {
         const name = String(body.name || '').trim();
         const url  = String(body.url  || '').trim();
-        if (!name || !url) return { statusCode: 400, body: JSON.stringify({ error: 'Missing name or url' }) };
-        const ref = await col.add({ name, url, visible: true, createdAt: Date.now() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true, id: ref.id }) };
+        if (!name || !url) return json(400, { error: 'Missing name or url' });
+        const ref = await col.add({
+          name,
+          nameLower: name.toLowerCase(),
+          url,
+          visible: true,
+          createdAt: Date.now()
+        });
+        return json(200, { ok: true, id: ref.id });
       }
 
       case 'toggle': {
-        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
+        if (!body.id) return json(400, { error: 'Missing id' });
         await col.doc(body.id).update({ visible: !!body.visible });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        return json(200, { ok: true });
       }
 
       case 'delete': {
-        if (!body.id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing id' }) };
+        if (!body.id) return json(400, { error: 'Missing id' });
         await col.doc(body.id).delete();
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        return json(200, { ok: true });
       }
 
       case 'reset': {
@@ -138,19 +164,32 @@ exports.handler = async (event, context) => {
         const batch = db.batch();
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
-        for (const a of DEFAULT_APPS) await col.add({ ...a, createdAt: Date.now() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        for (const a of DEFAULT_APPS) {
+          await col.add({
+            ...a,
+            nameLower: a.name.toLowerCase(),
+            createdAt: Date.now()
+          });
+        }
+        return json(200, { ok: true });
       }
 
       case 'seed': {
-        for (const a of DEFAULT_APPS) await col.add({ ...a, createdAt: Date.now() });
-        return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+        for (const a of DEFAULT_APPS) {
+          await col.add({
+            ...a,
+            nameLower: a.name.toLowerCase(),
+            createdAt: Date.now()
+          });
+        }
+        return json(200, { ok: true });
       }
 
-      default: return { statusCode: 400, body: JSON.stringify({ error: 'Unknown action' }) };
+      default:
+        return json(400, { error: 'Unknown action' });
     }
   } catch (e) {
-    console.error("Database error:", e); 
-    return { statusCode: 500, body: JSON.stringify({ error: 'Database error: ' + e.message }) };
+    console.error('Database error:', e);
+    return json(500, { error: 'Database error: ' + e.message });
   }
 };
