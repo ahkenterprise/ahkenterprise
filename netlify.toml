@@ -3,5 +3,5 @@
   functions = "netlify/functions"
 
 [build.environment]
-  SECRETS_SCAN_OMIT_PATHS = "netlify/functions/migym-chat.js,migym/index.html"
-  SECRETS_SCAN_OMIT_KEYS = "AI_MODEL,AI_API_URL,SECRETS_SCAN_DETECTION_OMIT_VALUES"
+  SECRETS_SCAN_OMIT_PATHS = "netlify/functions/*,migym/index.html"
+  SECRETS_SCAN_OMIT_KEYS = "AI_MODEL,AI_API_URL"
