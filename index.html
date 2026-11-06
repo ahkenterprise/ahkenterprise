@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Welcome | AHK Enterprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================
+           1. 强力隐藏 Netlify 角标
+           ========================================== */
+        iframe[title="Netlify"], 
+        #netlify-badge, 
+        div[id*="netlify"], 
+        a[href*="netlify.com"],
+        .netlify-badge,
+        body > div[style*="position: fixed"][style*="bottom: 0"],
+        body > iframe[style*="position: fixed"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            z-index: -99999 !important;
+            pointer-events: none !important;
+            transform: scale(0) !important;
+        }
+
+        /* ==========================================
+           2. 基础重置
+           ========================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0b192c; 
+            height: 100vh;
+            height: 100dvh; 
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed; 
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body::before {
+            content: ''; 
+            position: absolute; 
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%); 
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, rgba(230, 46, 60, 0.12) 0%, transparent 60%);
+            z-index: 0; pointer-events: none;
+        }
+
+        /* --- 首页 --- */
+        .landing-wrapper {
+            position: relative; z-index: 10; display: flex;
+            flex-direction: column; align-items: center;
+            padding: 20px; text-align: center;
+        }
+        .landing-logo {
+            max-width: 250px; height: auto; display: block;
+            margin-bottom: 50px; 
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+            cursor: pointer; user-select: none;
+            transition: transform 0.2s;
+        }
+        .landing-logo:active { transform: scale(0.95); }
+
+        .single-btn {
+            display: inline-block; padding: 20px 55px;
+            font-family: 'Montserrat', sans-serif; font-size: 1.1rem;
+            font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+            text-decoration: none; color: #ffffff; background-color: #e62e3c; 
+            border: 2px solid #e62e3c; border-radius: 50px;
+            transition: all 0.4s ease; box-shadow: 0 10px 30px rgba(230, 46, 60, 0.3);
+            cursor: pointer;
+        }
+        .single-btn:hover, .single-btn:active {
+            background-color: transparent; color: #e62e3c;
+            transform: translateY(-2px); box-shadow: 0 15px 40px rgba(230, 46, 60, 0.5);
+        }
+
+        /* --- 弹窗 --- */
+        .modal {
+            display: none; position: fixed; z-index: 999999;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(11, 25, 44, 0.85); backdrop-filter: blur(8px);
+            justify-content: center; align-items: center;
+            padding: 15px;
+        }
+        .modal-content {
+            background-color: #11223a; padding: 30px; border-radius: 20px;
+            border: 1px solid rgba(230, 46, 60, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 100%; max-width: 420px;
+            position: relative; 
+            max-height: 85vh;
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+            animation: fadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px) scale(0.95); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+
+        .modal-header {
+            text-align: center; margin-bottom: 20px;
+            padding-bottom: 15px; border-bottom: 1px solid #2a3b52;
+        }
+        .modal-header h2 { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 1.2rem; letter-spacing: 1px; }
+        .modal-header p { color: #a0aec0; font-size: 0.85rem; margin-top: 5px; }
+
+        .close-btn {
+            position: absolute; top: 15px; right: 20px;
+            color: #a0aec0; font-size: 28px; font-weight: bold;
+            cursor: pointer; transition: color 0.3s ease; line-height: 1; padding: 5px;
+        }
+        .close-btn:hover, .close-btn:active { color: #e62e3c; }
+
+        /* --- 输入框通用样式 --- */
+        .admin-input-group { margin-bottom: 15px; text-align: left; }
+        .admin-input-group label { display: block; color: #a0aec0; font-size: 0.85rem; margin-bottom: 5px; }
+        .admin-input-group input {
+            width: 100%; padding: 15px; border-radius: 12px;
+            border: 1px solid #4a5a70; background-color: #11223a;
+            color: white; font-family: 'Poppins', sans-serif; outline: none; font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .admin-input-group input:focus { border-color: #e62e3c; }
+        
+        .add-btn {
+            width: 100%; padding: 15px; background-color: #e62e3c;
+            color: white; border: none; border-radius: 12px;
+            font-family: 'Montserrat', sans-serif; font-weight: 600;
+            font-size: 1rem; cursor: pointer; transition: 0.3s;
+        }
+        .add-btn:hover, .add-btn:active { background-color: #c9212f; }
+
+        /* --- 错误提示 --- */
+        .error-msg {
+            color: #ff4d4d; font-size: 0.85rem; text-align: center; 
+            margin-top: 15px; display: none;
+            background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 8px;
+        }
+
+        /* --- 后台管理面板 --- */
+        .admin-panel { border: 1px solid #4a5a70; background-color: #0d1b2a; }
+        .admin-panel .modal-header h2 { color: #e62e3c; }
+        
+        .admin-list-title { color: #ffffff; font-size: 0.85rem; margin-top: 25px; margin-bottom: 10px; text-align: left; border-bottom: 1px solid #4a5a70; padding-bottom: 5px; }
+        .admin-link-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #11223a; padding: 10px 12px; border-radius: 8px;
+            margin-bottom: 8px; border-left: 3px solid #e62e3c;
+        }
+        .admin-link-item.hidden-link { opacity: 0.5; border-left-color: #4a5a70; }
+        .admin-link-info { text-align: left; flex-grow: 1; overflow: hidden; }
+        .admin-link-info strong { color: white; font-size: 0.9rem; display: block; }
+        .admin-link-info small { color: #a0aec0; font-size: 0.75rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .action-btn { background: transparent; border: none; cursor: pointer; font-size: 1.3rem; margin-left: 10px; transition: transform 0.2s; padding: 5px; }
+        .action-btn:hover, .action-btn:active { transform: scale(1.1); }
+        .toggle-btn { color: #4CAF50; }
+        .toggle-btn.is-hidden { color: #889cb5; }
+
+        .logout-btn, .reset-btn { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: 0.3s; font-size: 0.9rem; background-color: transparent; }
+        .reset-btn { color: #f39c12; border: 1px solid #f39c12; margin-top: 15px; }
+        .reset-btn:hover, .reset-btn:active { background-color: #f39c12; color: white; }
+        .logout-btn { color: #ff4d4d; border: 1px solid #ff4d4d; margin-top: 10px; }
+        .logout-btn:hover, .logout-btn:active { background-color: #ff4d4d; color: white; }
+
+        @media (max-width: 480px) {
+            .landing-logo { max-width: 180px; margin-bottom: 40px; }
+            .single-btn { padding: 18px 40px; font-size: 1rem; width: 100%; }
+            .modal-content { padding: 25px 20px; max-height: 90vh; }
+            .close-btn { top: 10px; right: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="landing-wrapper">
+        <img src="logo.png" alt="AHK Enterprise Logo" class="landing-logo" id="secretLogo">
+        <button id="openOptionsBtn" class="single-btn">Enter</button>
+    </div>
+
+    <!-- 前台：输入应用名称直接跳转 -->
+    <div id="optionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeOptions">&times;</span>
+            <div class="modal-header">
+                <h2>Open App</h2>
+                <p>Enter the app name to continue</p>
+            </div>
+            <div class="admin-input-group">
+                <input type="text" id="searchAppInput" placeholder="e.g., Mi Gym App" autocomplete="off">
+            </div>
+            <button class="add-btn" onclick="searchAndOpenApp()">Open Now</button>
+            <p id="searchError" class="error-msg">App not found. Please check the name.</p>
+        </div>
+    </div>
+
+    <!-- 隐藏的后台管理 -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin-panel">
+            <span class="close-btn" id="closeAdmin">&times;</span>
+            
+            <div id="authSection">
+                <div class="modal-header">
+                    <h2>🔒 Admin Access</h2>
+                    <p>Enter admin email to continue.</p>
+                </div>
+                <div class="admin-input-group" style="width: 100%;">
+                    <input type="email" id="adminEmailInput" placeholder="cupncare@gmail.com">
+                </div>
+                <button class="add-btn" onclick="checkEmailLogin()" style="margin-top: 10px;">Login</button>
+            </div>
+
+            <div id="adminContentSection" style="display: none;">
+                <div class="modal-header">
+                    <h2>⚙️ Admin Panel</h2>
+                    <p>Manage Apps & Visibility</p>
+                </div>
+                
+                <div class="admin-input-group">
+                    <label>Display Name (Exact Name to search)</label>
+                    <input type="text" id="newLinkName" placeholder="e.g., New App">
+                </div>
+                <div class="admin-input-group">
+                    <label>Folder Path / URL</label>
+                    <input type="text" id="newLinkUrl" placeholder="e.g., newapp/index.html">
+                </div>
+                <button class="add-btn" id="addLinkBtn">+ Add App</button>
+
+                <div class="admin-list-title">App List (👁️ Hide / 🗑️ Remove)</div>
+                <div id="adminLinksList"></div>
+                
+                <button class="reset-btn" onclick="resetToDefault()">⚠️ Reset Everything</button>
+                <button class="logout-btn" onclick="signOut()">Sign Out</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // [核心] 拔除 Netlify 角标
+        // ==========================================
+        const badgeKiller = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.tagName === 'IFRAME' || node.tagName === 'A') {
+                        if ((node.title && node.title.includes('Netlify')) || 
+                            (node.href && node.href.includes('netlify.com')) ||
+                            (node.src && node.src.includes('netlify.com'))) {
+                            node.remove();
+                        }
+                    }
+                    if (node.tagName === 'DIV') {
+                        if (node.id && node.id.includes('netlify')) { node.remove(); }
+                        if (node.style && node.style.position === 'fixed' && node.innerHTML.includes('netlify')) { node.remove(); }
+                    }
+                });
+            });
+        });
+        badgeKiller.observe(document.documentElement, { childList: true, subtree: true });
+
+
+        // ==========================================
+        // 1. 数据设置
+        // ==========================================
+        const AUTHORIZED_EMAIL = "cupncare@gmail.com"; 
+
+        const defaultLinks = [
+            { id: '1', name: "Cup N Care", url: "cupncare/index.html", visible: true },
+            { id: '2', name: "AHK Wellness", url: "ahk/index.html", visible: true },
+            { id: '3', name: "Abdul Hameed Kunhi", url: "ahk/index.html", visible: true },
+            { id: '4', name: "Mi Gym App", url: "migym/index.html", visible: true },
+            { id: '5', name: "Profile Mi", url: "profilemi/index.html", visible: true }
+        ];
+
+        let allLinks = JSON.parse(localStorage.getItem('ahkLinksData')) || [...defaultLinks];
+
+        function saveData() {
+            localStorage.setItem('ahkLinksData', JSON.stringify(allLinks));
+        }
+
+        // ==========================================
+        // 2. 核心：前台搜索并跳转逻辑
+        // ==========================================
+        window.searchAndOpenApp = function() {
+            const searchInput = document.getElementById('searchAppInput').value.trim().toLowerCase();
+            const errorMsg = document.getElementById('searchError');
+            
+            if (!searchInput) {
+                errorMsg.innerText = "Please enter an app name.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // 只在可见的应用中查找
+            const visibleApps = allLinks.filter(link => link.visible);
+
+            // 1. 优先尝试精确匹配（忽略大小写）
+            let targetApp = visibleApps.find(app => app.name.toLowerCase() === searchInput);
+
+            // 2. 如果没有精确匹配，尝试模糊匹配（包含关键字）
+            if (!targetApp) {
+                targetApp = visibleApps.find(app => app.name.toLowerCase().includes(searchInput));
+            }
+
+            if (targetApp) {
+                // 找到应用，隐藏错误，直接跳转
+                errorMsg.style.display = 'none';
+                document.getElementById('searchAppInput').value = ''; // 清空输入框
+                window.location.href = targetApp.url; // 执行跳转
+            } else {
+                // 没找到，显示错误提示
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = `"${searchInput}" not found or is hidden.`;
+            }
+        };
+
+        // 监听回车键
+        document.getElementById('searchAppInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchAndOpenApp();
+            }
+        });
+
+
+        // ==========================================
+        // 3. 后台管理渲染与操作
+        // ==========================================
+        function renderAdminList() {
+            const listContainer = document.getElementById('adminLinksList');
+            listContainer.innerHTML = ''; 
+
+            if (allLinks.length === 0) {
+                listContainer.innerHTML = '<p style="color: #a0aec0; font-size: 0.8rem; text-align: center;">List is empty. Click Reset.</p>';
+                return;
+            }
+
+            allLinks.forEach((link) => {
+                const item = document.createElement('div');
+                item.className = `admin-link-item ${link.visible ? '' : 'hidden-link'}`;
+                const eyeIcon = link.visible ? '👁️' : '🙈';
+                const btnClass = link.visible ? 'toggle-btn' : 'toggle-btn is-hidden';
+
+                item.innerHTML = `
+                    <div class="admin-link-info">
+                        <strong>${link.name}</strong>
+                        <small>${link.url}</small>
+                    </div>
+                    <button class="action-btn ${btnClass}" onclick="toggleVisibility('${link.id}')">${eyeIcon}</button>
+                    <button class="action-btn delete-btn" onclick="deleteLink('${link.id}')">🗑️</button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        window.checkEmailLogin = function() {
+            const inputEmail = document.getElementById('adminEmailInput').value.trim().toLowerCase();
+            if (inputEmail === AUTHORIZED_EMAIL) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('adminContentSection').style.display = 'block';
+                document.getElementById('adminEmailInput').value = '';
+                renderAdminList(); 
+            } else {
+                alert("拒绝访问！\n请输入正确的管理员邮箱。");
+            }
+        };
+
+        document.getElementById('addLinkBtn').addEventListener('click', () => {
+            const nameInput = document.getElementById('newLinkName').value.trim();
+            const urlInput = document.getElementById('newLinkUrl').value.trim();
+
+            if (nameInput === '' || urlInput === '') {
+                alert("Please fill in both fields.");
+                return;
+            }
+
+            const newLink = {
+                id: Date.now().toString(),
+                name: nameInput,
+                url: urlInput,
+                visible: true
+            };
+
+            allLinks.push(newLink);
+            saveData();
+            document.getElementById('newLinkName').value = '';
+            document.getElementById('newLinkUrl').value = '';
+            renderAdminList();
+        });
+
+        window.toggleVisibility = function(id) {
+            const link = allLinks.find(l => l.id === id);
+            if (link) {
+                link.visible = !link.visible;
+                saveData();
+                renderAdminList();
+            }
+        };
+
+        window.deleteLink = function(id) {
+            if(confirm("Remove this from the list?\n(NOT deleting server folder)")) {
+                allLinks = allLinks.filter(l => String(l.id) !== String(id));
+                saveData();
+                renderAdminList();
+            }
+        };
+
+        window.resetToDefault = function() {
+            if(confirm("Restore default buttons? All custom changes will be lost.")) {
+                localStorage.removeItem('ahkLinksData');
+                allLinks = [...defaultLinks];
+                saveData();
+                renderAdminList();
+            }
+        };
+
+        function signOut() {
+            document.getElementById('adminContentSection').style.display = 'none';
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('adminModal').style.display = "none";
+        }
+
+        // ==========================================
+        // 4. 弹窗触发逻辑
+        // ==========================================
+        const optionsModal = document.getElementById("optionsModal");
+        const openOptionsBtn = document.getElementById("openOptionsBtn");
+        const closeOptions = document.getElementById("closeOptions");
+        const adminModal = document.getElementById("adminModal");
+        const closeAdmin = document.getElementById("closeAdmin");
+        const secretLogo = document.getElementById("secretLogo");
+
+        openOptionsBtn.onclick = () => {
+            optionsModal.style.display = "flex";
+            // 打开弹窗后，自动让输入框获取焦点，方便直接打字
+            setTimeout(() => {
+                document.getElementById('searchAppInput').focus();
+            }, 100);
+            // 每次打开清空上一次的错误提示
+            document.getElementById('searchError').style.display = 'none';
+            document.getElementById('searchAppInput').value = '';
+        };
+        
+        closeOptions.onclick = () => optionsModal.style.display = "none";
+        closeAdmin.onclick = () => adminModal.style.display = "none";
+
+        let clickCount = 0;
+        let clickTimer;
+        secretLogo.addEventListener("click", () => {
+            clickCount++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+
+            if (clickCount === 5) {
+                adminModal.style.display = "flex";
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('adminContentSection').style.display = 'none';
+                clickCount = 0; 
+            }
+        });
+
+        window.onclick = function(event) {
+            if (event.target == optionsModal) optionsModal.style.display = "none";
+            if (event.target == adminModal) adminModal.style.display = "none";
+        }
+
+        // 初始化后台列表数据
+        renderAdminList(); 
+    </script>
+
+</body>
+</html>
