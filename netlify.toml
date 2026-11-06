@@ -2,8 +2,3 @@
   publish = "."
   functions = "netlify/functions"
   command = "echo 'No build required'"
-
-[build.environment]
-  SECRETS_SCAN_OMIT_PATHS = "netlify/functions/migym-chat.js,migym/index.html"
-  SECRETS_SCAN_OMIT_KEYS = "AI_MODEL,AI_API_URL"
-  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "ahkunhi@gmail.com,cupncare@gmail.com"
