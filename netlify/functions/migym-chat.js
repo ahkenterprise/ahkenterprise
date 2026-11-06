@@ -1,5 +1,4 @@
 exports.handler = async (event, context) => {
-  // Only allow POST requests
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
@@ -7,7 +6,7 @@ exports.handler = async (event, context) => {
   try {
     const { systemPrompt, prompt } = JSON.parse(event.body);
     
-    // ⚠️ IMPORTANT: These are set in your Netlify Dashboard, NOT here!
+    // These are pulled securely from Netlify Environment Variables
     const apiKey = process.env.AI_API_KEY; 
     const apiUrl = process.env.AI_API_URL || "https://api.groq.com/openai/v1/chat/completions";
     const model = process.env.AI_MODEL || "llama-3.3-70b-versatile";
