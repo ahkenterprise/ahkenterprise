@@ -2,48 +2,21 @@
   "name": "MiGym Pro",
   "short_name": "MiGym",
   "description": "Gym management for owners and members — memberships, payments, door access, AI coach.",
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "/migym/index.html",
+  "scope": "/migym/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#07080a",
   "theme_color": "#c6ff3d",
-  "lang": "en",
-  "dir": "ltr",
-  "categories": ["health", "fitness", "business", "productivity"],
-  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/migym/logo.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "/logo.png",
+      "src": "/migym/logo.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "My Gym",
-      "short_name": "Home",
-      "url": "/index.html",
-      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "AI Coach",
-      "short_name": "Coach",
-      "url": "/index.html",
-      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+      "type": "image/png"
     }
   ]
 }
