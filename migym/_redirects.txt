@@ -1,4 +1,5 @@
-# MiGym Pro — Netlify SPA routing
-# Serves index.html for all routes so deep links like ?gym=gym_123 work
+# SPA Routing for the app
+/migym/*    /migym/index.html   200
 
-/*    /index.html   200
+# Fix for Android verifying the subfolder app
+/.well-known/assetlinks.json    /migym/.well-known/assetlinks.json   200
