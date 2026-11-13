@@ -1,4 +1,15 @@
+[build]
+  publish = "."
+
+# 1. Fix for Android: Serve the assetlinks file at the domain root
 [[redirects]]
   from = "/.well-known/assetlinks.json"
   to = "/migym/.well-known/assetlinks.json"
+  status = 200
+  force = true
+
+# 2. SPA routing: If someone types a random URL, send them to the app
+[[redirects]]
+  from = "/migym/*"
+  to = "/migym/migympro.html"
   status = 200
