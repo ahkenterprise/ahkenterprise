@@ -1,7 +1,14 @@
 [build]
   publish = "."
 
-# 1. SPA routing: If someone types a random URL, send them to the app
+# 1. Trick Android to look inside the regular folder
+[[redirects]]
+  from = "/.well-known/assetlinks.json"
+  to = "/well-known/assetlinks.json"
+  status = 200
+  force = true
+
+# 2. SPA routing: Send unknown paths to your main app
 [[redirects]]
   from = "/*"
   to = "/migympro.html"
