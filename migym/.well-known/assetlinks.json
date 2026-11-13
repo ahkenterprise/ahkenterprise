@@ -1,1 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.ahkenterprise.migym",
+        "sha256_cert_fingerprints": ["B6:EF:DC:D3:A3:A0:62:0A:AD:6D:4F:BB:94:70:C5:E8:A1:20:22:39:5C:96:0B:85:EE:34:10:14:6E:7D:D8:3D"]
+      }
+    }]
 
