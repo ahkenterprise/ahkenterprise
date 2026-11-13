@@ -2,7 +2,7 @@
   "name": "MiGym Pro",
   "short_name": "MiGym",
   "description": "Gym management for owners and members — memberships, payments, door access, AI coach.",
-  "start_url": "/migym/index.html",
+  "start_url": "/migym/migympro.html",
   "scope": "/migym/",
   "display": "standalone",
   "background_color": "#07080a",
