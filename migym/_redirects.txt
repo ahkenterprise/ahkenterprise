@@ -1,0 +1,4 @@
+# MiGym Pro — Netlify SPA routing
+# Serves index.html for all routes so deep links like ?gym=gym_123 work
+
+/*    /index.html   200

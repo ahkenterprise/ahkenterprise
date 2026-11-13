@@ -1,0 +1,12 @@
+# MiGym Pro
+# Public landing pages are indexable; private API endpoints are not.
+
+User-agent: *
+Allow: /
+Allow: /privacy-policy.html
+Disallow: /.well-known/
+Disallow: /index.html?gym=
+Disallow: /index.html?ref=
+
+# Sitemap location (optional)
+Sitemap: https://your-domain.netlify.app/sitemap.xml
