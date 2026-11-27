@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AHK Book Maker – Book Cover &amp; PDF Creator</title>
+<meta name="description" content="Create print-ready book covers and interior PDFs for KDP, Pothi and IngramSpark.">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #090606;
+  --panel: rgba(25, 17, 17, 0.72);
+  --panel-hover: rgba(34, 22, 22, 0.92);
+  --line: rgba(232, 178, 74, 0.16);
+  --line-strong: rgba(232, 178, 74, 0.38);
+  --red: #d81f26;
+  --red-deep: #8f0f15;
+  --gold: #e8b24a;
+  --gold-soft: #f5d388;
+  --paper: #f7f1e8;
+  --muted: #b5a79e;
+}
+
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 80% 45% at 50% -5%, rgba(216, 31, 38, 0.28), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 50% 105%, rgba(232, 178, 74, 0.12), transparent 70%),
+    var(--ink);
+  color: var(--paper);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.45;
+  padding:
+    max(16px, env(safe-area-inset-top, 0px))
+    18px
+    max(16px, env(safe-area-inset-bottom, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  width: 100%;
+  max-width: 840px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 1.8vh, 18px);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(232, 178, 74, 0.08);
+  border: 1px solid var(--line-strong);
+  color: var(--gold-soft);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: fadeUp 0.65s ease both;
+}
+
+.icon-wrap {
+  position: relative;
+  width: clamp(96px, 15vh, 156px);
+  animation: fadeUp 0.75s cubic-bezier(0.2, 0.75, 0.2, 1) 0.05s both;
+}
+
+.icon-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 26%;
+  background: radial-gradient(circle, rgba(232, 178, 74, 0.24), rgba(216, 31, 38, 0.22) 60%, transparent 75%);
+  filter: blur(12px);
+  z-index: -1;
+}
+
+.icon {
+  width: 100%;
+  aspect-ratio: 1;
+  display: block;
+  border-radius: 22%;
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(216, 31, 38, 0.3);
+}
+
+h1 {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 5.2vw, 3.1rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  background: linear-gradient(180deg, #ffffff 15%, #eadcc9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fadeUp 0.75s cubic-bezier(0.2, 0.75, 0.2, 1) 0.1s both;
+}
+
+.divider {
+  width: 52px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: fadeUp 0.75s ease 0.14s both;
+}
+
+.sub {
+  max-width: 42ch;
+  font-size: clamp(0.92rem, 1.8vw, 1.05rem);
+  color: var(--muted);
+  animation: fadeUp 0.75s ease 0.18s both;
+}
+
+.cta {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 2px;
+  padding: clamp(12px, 1.8vh, 15px) clamp(28px, 4vw, 38px);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--red) 0%, var(--red-deep) 100%);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: clamp(0.98rem, 1.8vw, 1.06rem);
+  border: 1px solid rgba(255, 224, 166, 0.35);
+  box-shadow:
+    0 10px 26px rgba(216, 31, 38, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  animation: fadeUp 0.75s ease 0.22s both;
+}
+
+.cta::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.55s ease;
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 34px rgba(216, 31, 38, 0.58),
+    0 0 20px rgba(232, 178, 74, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  filter: brightness(1.05);
+}
+
+.cta:hover::after { left: 160%; }
+.cta:active { transform: translateY(0); }
+.cta:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+
+.cta svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.2s ease;
+}
+.cta:hover svg { transform: translateX(3px); }
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin-top: clamp(4px, 1vh, 10px);
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  text-align: left;
+  animation: fadeUp 0.8s ease 0.28s both;
+}
+
+.features li {
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: clamp(11px, 1.5vh, 16px) 16px;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.features li:hover {
+  transform: translateY(-2px);
+  background: var(--panel-hover);
+  border-color: var(--line-strong);
+}
+
+.step {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-bottom: 3px;
+}
+
+.features strong {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1rem, 1.7vw, 1.12rem);
+  color: var(--paper);
+  margin-bottom: 2px;
+}
+
+.features span {
+  display: block;
+  color: var(--muted);
+  font-size: clamp(0.82rem, 1.3vw, 0.9rem);
+  line-height: 1.4;
+}
+
+footer {
+  margin-top: clamp(2px, 0.6vh, 8px);
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (min-width: 680px) {
+  .features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow, .icon-wrap, h1, .divider, .sub, .cta, .features { animation: none; }
+  .cta, .cta::after, .cta svg, .features li { transition: none; }
+}
+</style>
+</head>
+<body>
+<main>
+  <span class="eyebrow">Print-Ready Publishing Studio</span>
+
+  <div class="icon-wrap">
+    <img class="icon" src="icon-512.png" alt="AHK Book Maker app icon" width="512" height="512">
+  </div>
+
+  <h1>AHK Book Maker</h1>
+  <div class="divider" aria-hidden="true"></div>
+  <p class="sub">Craft press-ready book covers and precision-trimmed interior PDFs in minutes.</p>
+
+  <a class="cta" id="open" href="ahkcm.html">
+    <span>Open Book Maker</span>
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 10h12M11 5l5 5-5 5"/>
+    </svg>
+  </a>
+
+  <ul class="features">
+    <li>
+      <span class="step">01 · COVER</span>
+      <strong>Full Cover Wrap</strong>
+      <span>Front, calculated spine, and back cover unified in one print-ready layout.</span>
+    </li>
+    <li>
+      <span class="step">02 · INTERIOR</span>
+      <strong>Interior PDF</strong>
+      <span>Scale and align your manuscript pages cleanly to exact trim dimensions.</span>
+    </li>
+    <li>
+      <span class="step">03 · EXPORT</span>
+      <strong>Print Platforms</strong>
+      <span>Formatted to meet press standards for KDP, Pothi, and IngramSpark.</span>
+    </li>
+  </ul>
+
+  <footer>© AHK Publishing Tools</footer>
+</main>
+</body>
+</html>
