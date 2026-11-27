@@ -1745,13 +1745,19 @@ function makeArt(src, bw, bh, mode, o) {
   c.imageSmoothingQuality = 'high';
   c.drawImage(img, dx, dy);
   if (mode === 'extend') {
-    const stripH = Math.max(2, Math.min(dh, Math.round(dh * 0.04)));
-    const mirrorH = (clip, tx, ty, sx, sy, sySrc, shSrc) => { c.save(); c.beginPath(); c.rect(clip[0], clip[1], clip[2], clip[3]); c.clip(); c.translate(tx, ty); c.scale(sx, sy); c.drawImage(img, 0, sySrc, dw, shSrc, dx, 0, dw, clip[3]); c.restore(); };
-    const mirrorV = (clip, tx, ty, sx, sy, sxSrc, swSrc) => { c.save(); c.beginPath(); c.rect(clip[0], clip[1], clip[2], clip[3]); c.clip(); c.translate(tx, ty); c.scale(sx, sy); c.drawImage(img, sxSrc, 0, swSrc, dh, 0, dy, clip[2], dh); c.restore(); };
-    if (dx > 0) mirrorV([0, 0, dx, bh], dx, 0, -1, 1, 0, Math.min(dw, Math.max(2, Math.round(dw * 0.04))));
-    if (dx + dw < bw) mirrorV([dx + dw, 0, bw - dx - dw, bh], dx + dw, 0, -1, 1, Math.max(0, dw - Math.max(2, Math.round(dw * 0.04))), Math.min(dw, Math.max(2, Math.round(dw * 0.04))));
-    if (dy > 0) mirrorH([0, 0, bw, dy], 0, dy, 1, -1, 0, stripH);
-    if (dy + dh < bh) mirrorH([0, dy + dh, bw, bh - dy - dh], 0, dy + dh, 1, -1, Math.max(0, dh - stripH), stripH);
+    /* Edge-colour stretch (no mirroring, so text/art is never duplicated) */
+    const band = (sx, sy, sw2, sh2, dx2, dy2, dw2, dh2, horiz) => {
+      if (dw2 < 1 || dh2 < 1) return;
+      const t = horiz ? mk(sw2, 1) : mk(1, sh2), tc = t.getContext('2d');
+      tc.imageSmoothingQuality = 'high';
+      tc.drawImage(img, sx, sy, sw2, sh2, 0, 0, t.width, t.height);
+      c.drawImage(t, 0, 0, t.width, t.height, dx2, dy2, dw2, dh2);
+    };
+    const th = Math.max(2, Math.round(dh * 0.02)), tw = Math.max(2, Math.round(dw * 0.02));
+    if (dy > 0) band(0, 0, dw, th, dx, 0, dw, dy, true);
+    if (dy + dh < bh) band(0, dh - th, dw, th, dx, dy + dh, dw, bh - dy - dh, true);
+    if (dx > 0) band(0, 0, tw, dh, 0, dy, dx, dh, false);
+    if (dx + dw < bw) band(dw - tw, 0, tw, dh, dx + dw, dy, bw - dx - dw, dh, false);
   }
   return out;
 }
