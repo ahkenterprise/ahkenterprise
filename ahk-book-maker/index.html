@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AHK Book Maker</title>
+  <link rel="icon" type="image/png" href="icon-512.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #0b0f19 0%, #151c2c 100%);
+      color: #f8fafc;
+      padding: 1.5rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 22px;
+      padding: 3rem 2.25rem;
+      text-align: center;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    .logo-wrapper {
+      width: 132px;
+      height: 132px;
+      margin: 0 auto 1.65rem;
+      border-radius: 26px;
+      overflow: hidden;
+      background: #000000;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    .logo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #e6c15a;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    p {
+      font-size: 0.98rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 2.1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 0.95rem 1.5rem;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #0b0f19;
+      background: linear-gradient(135deg, #e6c15a 0%, #c89d2e 100%);
+      border: none;
+      border-radius: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      box-shadow: 0 8px 22px rgba(212, 175, 55, 0.28);
+    }
+
+    .btn:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(212, 175, 55, 0.38);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo-wrapper">
+      <img src="icon-512.png" alt="AHK Book Maker Logo" />
+    </div>
+    <span class="badge">Publishing Studio</span>
+    <h1>AHK Book Maker</h1>
+    <p>Format manuscripts, prepare print-ready covers, and build publishing-ready books with precision.</p>
+    <a href="ahkcm.html" class="btn">AHK Book Maker</a>
+  </main>
+</body>
+</html>
