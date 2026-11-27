@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AHK Book Maker – Book Cover &amp; PDF Creator</title>
+<meta name="description" content="Create print-ready book covers and interior PDFs for KDP, Pothi and IngramSpark.">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #090606;
+  --panel: rgba(25, 17, 17, 0.78);
+  --line: rgba(232, 178, 74, 0.18);
+  --line-strong: rgba(232, 178, 74, 0.42);
+  --red: #d81f26;
+  --red-deep: #8f0f15;
+  --gold: #e8b24a;
+  --gold-soft: #f5d388;
+  --paper: #f7f1e8;
+  --muted: #b5a79e;
+}
+
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 80% 45% at 50% -5%, rgba(216, 31, 38, 0.28), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 50% 105%, rgba(232, 178, 74, 0.12), transparent 70%),
+    var(--ink);
+  color: var(--paper);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.4;
+  padding:
+    max(14px, env(safe-area-inset-top, 0px))
+    16px
+    max(14px, env(safe-area-inset-bottom, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.5vh, 16px);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(232, 178, 74, 0.08);
+  border: 1px solid var(--line-strong);
+  color: var(--gold-soft);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.art-frame {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(25, 17, 17, 0.65);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), 0 6px 22px rgba(216, 31, 38, 0.28);
+}
+
+.art-frame img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(170px, 42vw);
+  max-height: 22vh;
+  border-radius: 13px;
+  object-fit: contain;
+}
+
+h1 {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-weight: 800;
+  font-size: clamp(1.75rem, 5vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  background: linear-gradient(180deg, #ffffff 15%, #eadcc9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.divider {
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.sub {
+  max-width: 40ch;
+  font-size: clamp(0.88rem, 1.7vw, 1.02rem);
+  color: var(--muted);
+}
+
+.cta {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: clamp(11px, 1.5vh, 14px) clamp(26px, 3.8vw, 36px);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--red) 0%, var(--red-deep) 100%);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: clamp(0.95rem, 1.7vw, 1.05rem);
+  border: 1px solid rgba(255, 224, 166, 0.35);
+  box-shadow:
+    0 10px 24px rgba(216, 31, 38, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(216, 31, 38, 0.58);
+  filter: brightness(1.05);
+}
+.cta:active { transform: translateY(0); }
+.cta:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+
+.cta svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.2s ease;
+}
+.cta:hover svg { transform: translateX(3px); }
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin-top: 2px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  text-align: left;
+}
+
+.features li {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 9px 14px;
+}
+
+.step {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-right: 6px;
+}
+
+.features strong {
+  display: inline;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(0.96rem, 1.5vw, 1.06rem);
+  color: var(--paper);
+}
+
+.features span:last-child {
+  display: block;
+  color: var(--muted);
+  font-size: clamp(0.78rem, 1.25vw, 0.88rem);
+  margin-top: 2px;
+}
+
+footer {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+
+@media (min-width: 680px) {
+  .art-frame img {
+    max-width: 200px;
+    max-height: 24vh;
+  }
+  .features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .features li {
+    border-left: 1px solid var(--line);
+    border-top: 2px solid var(--gold);
+    padding: 14px 16px;
+  }
+  .step {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 4px;
+  }
+  .features strong {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta, .cta svg { transition: none; }
+}
+</style>
+</head>
+<body>
+<main>
+  <span class="eyebrow">Print-Ready Publishing Studio</span>
+
+  <div class="art-frame">
+    <img src="icon-512.png" alt="AHK Book Maker logo">
+  </div>
+
+  <h1>AHK Book Maker</h1>
+  <div class="divider" aria-hidden="true"></div>
+  <p class="sub">Craft press-ready book covers and precision-trimmed interior PDFs in minutes.</p>
+
+  <a class="cta" id="open" href="ahkcm.html">
+    <span>Open Book Maker</span>
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 10h12M11 5l5 5-5 5"/>
+    </svg>
+  </a>
+
+  <ul class="features">
+    <li>
+      <span class="step">01 · COVER</span>
+      <strong>Full Cover Wrap</strong>
+      <span>Front, calculated spine, and back cover in one layout.</span>
+    </li>
+    <li>
+      <span class="step">02 · INTERIOR</span>
+      <strong>Interior PDF</strong>
+      <span>Scale pages cleanly to exact trim dimensions.</span>
+    </li>
+    <li>
+      <span class="step">03 · EXPORT</span>
+      <strong>Print Platforms</strong>
+      <span>Ready for KDP, Pothi, and IngramSpark.</span>
+    </li>
+  </ul>
+
+  <footer>© AHK Publishing Tools</footer>
+</main>
+</body>
+</html>
