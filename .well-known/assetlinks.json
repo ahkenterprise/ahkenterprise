@@ -5,8 +5,7 @@
       "namespace": "android_app",
       "package_name": "com.ahkenterprise.bookmaker",
       "sha256_cert_fingerprints": [
-        "FINGERPRINT_FROM_PWABUILDER_ZIP",
-        "FINGERPRINT_FROM_PLAY_CONSOLE"
+        "PASTE_THE_REAL_FINGERPRINT_HERE"
       ]
     }
   }
