@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AHK Book Maker – Book Cover &amp; PDF Creator</title>
 <meta name="description" content="Create print-ready book covers and interior PDFs for KDP, Pothi and IngramSpark.">
-<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,13 +78,11 @@ main {
 }
 
 .logo-box {
-  width: clamp(84px, min(28vw, 18vh), 124px);
+  width: clamp(92px, min(28vw, 18vh), 128px);
   aspect-ratio: 1 / 1;
   flex-shrink: 0;
-  border-radius: 26px;
   overflow: hidden;
-  background: var(--ink);
-  border: 1px solid var(--line-strong);
+  background: transparent;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.7), 0 8px 26px rgba(216, 31, 38, 0.34);
 }
 
@@ -206,8 +205,7 @@ footer {
 
 @media (min-width: 680px) {
   .logo-box {
-    width: clamp(112px, min(20vw, 22vh), 176px);
-    border-radius: 36px;
+    width: clamp(120px, min(20vw, 22vh), 176px);
   }
   .features {
     grid-template-columns: repeat(3, 1fr);
@@ -239,7 +237,7 @@ footer {
   <span class="eyebrow">Print-Ready Publishing Studio</span>
 
   <div class="logo-box">
-    <img src="icon-192.png" alt="AHK Book Maker" width="192" height="192">
+    <img src="icon-512.png" alt="AHK Book Maker" width="512" height="512">
   </div>
 
   <h1>AHK Book Maker</h1>
