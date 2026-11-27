@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AHK Book Maker – Book Cover &amp; PDF Creator</title>
 <meta name="description" content="Create print-ready book covers and interior PDFs for KDP, Pothi and IngramSpark.">
-<meta name="theme-color" content="#b8963e">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,12 +77,12 @@ main {
 }
 
 .logo-box {
-  width: 124px;
-  max-width: 34vw;
+  width: clamp(84px, min(28vw, 18vh), 124px);
   aspect-ratio: 1 / 1;
   flex-shrink: 0;
   border-radius: 26px;
   overflow: hidden;
+  background: var(--ink);
   border: 1px solid var(--line-strong);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.7), 0 8px 26px rgba(216, 31, 38, 0.34);
 }
@@ -93,7 +91,7 @@ main {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 h1 {
@@ -208,8 +206,7 @@ footer {
 
 @media (min-width: 680px) {
   .logo-box {
-    width: 176px;
-    max-width: 176px;
+    width: clamp(112px, min(20vw, 22vh), 176px);
     border-radius: 36px;
   }
   .features {
@@ -276,15 +273,5 @@ footer {
 
   <footer>© AHK Publishing Tools</footer>
 </main>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function (e) {
-      console.warn('Service worker registration failed:', e);
-    });
-  });
-}
-</script>
 </body>
 </html>
