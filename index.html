@@ -56,6 +56,9 @@ button:focus-visible,input:focus-visible,.landing-logo:focus-visible{outline:2px
 .admin-avatar{width:40px;height:40px;border-radius:50%;background:#e62e3c;object-fit:cover;flex-shrink:0}
 .admin-list-title{color:#fff;font-size:.85rem;margin:25px 0 10px;text-align:left;border-bottom:1px solid #4a5a70;padding-bottom:5px}
 .admin-link-item{display:flex;justify-content:space-between;align-items:center;background:#11223a;padding:10px 12px;border-radius:8px;margin-bottom:8px;border-left:3px solid #e62e3c}
+.admin-link-item.suggested{border-left-color:#f5c542}
+.admin-check{display:flex;align-items:center;gap:8px;color:#a0aec0;font-size:.85rem;margin:-5px 0 15px;text-align:left;cursor:pointer}
+.admin-check input{width:18px;height:18px;accent-color:#e62e3c}
 .admin-link-item.hidden-link{opacity:.5;border-left-color:#4a5a70}
 .admin-link-info{text-align:left;flex-grow:1;overflow:hidden}
 .admin-link-info strong{color:#fff;font-size:.9rem;display:block}
@@ -104,7 +107,7 @@ button:focus-visible,input:focus-visible,.landing-logo:focus-visible{outline:2px
         <button class="close-btn" id="closeOptions" aria-label="Close">&times;</button>
         <div class="modal-header">
             <h2 id="optTitle">Open App</h2>
-            <p>Type the app name or pick one</p>
+            <p>Type the app name to open it</p>
         </div>
         <div class="admin-input-group">
             <input type="text" id="searchAppInput" placeholder="e.g., Mi Gym App" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -152,9 +155,10 @@ button:focus-visible,input:focus-visible,.landing-logo:focus-visible{outline:2px
                 <label for="newLinkUrl">Folder path or URL</label>
                 <input type="text" id="newLinkUrl" placeholder="e.g., newapp/index.html" autocomplete="off" autocapitalize="off">
             </div>
+            <label class="admin-check"><input type="checkbox" id="newLinkSuggest"> Show as quick-pick button on Open App screen</label>
             <button class="add-btn" id="addLinkBtn">+ Add App</button>
 
-            <div class="admin-list-title">App list (✏️ Edit / 👁️ Hide / 🗑️ Remove)</div>
+            <div class="admin-list-title">App list (⭐ Quick-pick / ✏️ Edit / 👁️ Hide / 🗑️ Remove)</div>
             <div id="adminLinksList"></div>
 
             <button class="test-api-btn" id="testApiBtn">🔐 Test Secure API (px.js)</button>
@@ -291,12 +295,12 @@ const AppStore = {
       snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))), errCb);
   },
 
-  async addApp(name, url) {
+  async addApp(name, url, suggest = false) {
     if (!isConfigured) {
-      const l = this._readLocal(); l.push({ id: Date.now().toString(), name, url, visible: true });
+      const l = this._readLocal(); l.push({ id: Date.now().toString(), name, url, visible: true, suggest });
       return this._writeLocal(l);
     }
-    await setDoc(doc(collection(db, APP_COLLECTION)), { name, url, visible: true, createdAt: Date.now() });
+    await setDoc(doc(collection(db, APP_COLLECTION)), { name, url, visible: true, suggest, createdAt: Date.now() });
   },
   async updateApp(id, fields) {
     if (!isConfigured) {
@@ -412,12 +416,13 @@ function renderAdminList() {
   $('seedBtn').style.display = 'none';
   adminAppsCache.forEach(link => {
     const item = document.createElement('div');
-    item.className = 'admin-link-item' + (link.visible ? '' : ' hidden-link');
+    item.className = 'admin-link-item' + (link.visible ? '' : ' hidden-link') + (link.suggest ? ' suggested' : '');
     const info = document.createElement('div'); info.className = 'admin-link-info';
     const s = document.createElement('strong'); s.textContent = link.name;
     const sm = document.createElement('small'); sm.textContent = link.url;
     info.append(s, sm);
     item.append(info,
+      iconBtn('', link.suggest ? '⭐' : '☆', link.suggest ? 'Remove from quick-picks' : 'Show as quick-pick', () => handleSuggest(link)),
       iconBtn('', '✏️', 'Edit', () => handleEdit(link)),
       iconBtn('', link.visible ? '👁️' : '🙈', link.visible ? 'Hide' : 'Show', () => handleToggle(link)),
       iconBtn('', '🗑️', 'Delete', () => handleDelete(link)));
@@ -435,6 +440,9 @@ async function run(fn, okMsg, errPrefix) {
 
 const handleToggle = link => run(() => AppStore.updateApp(link.id, { visible: !link.visible }),
   link.visible ? 'Hidden' : 'Visible', "Couldn't update");
+
+const handleSuggest = link => run(() => AppStore.updateApp(link.id, { suggest: !link.suggest }),
+  link.suggest ? 'Removed from quick-picks' : 'Added to quick-picks', "Couldn't update");
 
 const handleDelete = link => confirm(`Remove "${link.name}" from the list?`) &&
   run(() => AppStore.deleteApp(link.id), 'Removed', "Couldn't remove");
@@ -454,8 +462,8 @@ async function handleAdd() {
   if (!normalizeUrl(url)) return toast('That path or URL is not valid.', true);
   if (adminAppsCache.some(a => String(a.name).toLowerCase() === name.toLowerCase()))
     return toast(`"${name}" already exists.`, true);
-  await run(() => AppStore.addApp(name, url), `Added "${name}"`, "Couldn't add");
-  $('newLinkName').value = ''; $('newLinkUrl').value = '';
+  await run(() => AppStore.addApp(name, url, $('newLinkSuggest').checked), `Added "${name}"`, "Couldn't add");
+  $('newLinkName').value = ''; $('newLinkUrl').value = ''; $('newLinkSuggest').checked = false;
 }
 
 const handleReset = () => confirm("Reset all apps to defaults? This cannot be undone.") &&
@@ -501,7 +509,8 @@ function setSearchMsg(text, color) {
 async function loadSuggestions() {
   const box = $('suggestions');
   box.innerHTML = '';
-  const apps = await AppStore.getVisibleApps();
+  const apps = (await AppStore.getVisibleApps()).filter(a => a.suggest === true);
+  box.style.display = apps.length ? 'flex' : 'none';
   const seen = new Set();
   apps.forEach(a => {
     const n = String(a.name || '').trim();
