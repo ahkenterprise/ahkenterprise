@@ -210,6 +210,8 @@ if (isConfigured) {
   db   = getFirestore(fbApp);
   setPersistence(auth, browserLocalPersistence).catch(console.error);
   provider = new GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
   provider.setCustomParameters({ prompt: 'select_account' });
 } else {
   document.getElementById('configWarning').style.display = 'block';
@@ -222,6 +224,8 @@ function getUserEmail(user) {
   if (!user) return null;
   if (user.email) return user.email.toLowerCase();
   for (const p of user.providerData || []) if (p.email) return p.email.toLowerCase();
+  const raw = user.reloadUserInfo && user.reloadUserInfo.email;
+  if (raw) return String(raw).toLowerCase();
   return null;
 }
 const isAdminEmail = e => !!e && e === SUPERADMIN_EMAIL.toLowerCase();
@@ -589,9 +593,13 @@ checkHash();
       if (result && result.user) {
         const email = getUserEmail(result.user);
         openAdmin();
-        if (!isAdminEmail(email)) {
+        if (!email) {
+          const ids = (result.user.providerData || []).map(p => p.providerId).join(', ') || 'none';
           await fbSignOut(auth);
-          showLoginScreen(`Access denied. "${email || 'Unknown'}" is not authorized.`);
+          showLoginScreen(`Google signed you in but did not share an email (providers: ${ids}). Please try again.`);
+        } else if (!isAdminEmail(email)) {
+          await fbSignOut(auth);
+          showLoginScreen(`Access denied. "${email}" is not authorized.`);
         }
       }
     } catch (e) {
