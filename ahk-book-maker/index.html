@@ -1,1 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AHK Book Maker – Print PDF · Cover · eBook · Pre-flight</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#b8963e" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#1c1b19;--muted:#6f6a60;--line:#e6dfd2;--gold:#b8963e;--gold2:#8a6d22;--ok:#15803d;--okbg:#ecfdf3;--bad:#b42318;--badbg:#fef3f2;--warn:#a15c07;--warnbg:#fff7e6;--info:#1d4ed8;--infobg:#eff6ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.45;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:16px 14px 64px}
+header h1{font-size:21px;margin:4px 0 2px;letter-spacing:-.01em}
+header p{margin:0 0 12px;color:var(--muted);font-size:13px}
+.top-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);background:#f6ecd3;padding:3px 9px;border-radius:99px}
+.badge.pro{background:var(--okbg);color:var(--ok)}
+.play-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
+.play-pill.unlocked{border-color:#86efac;background:var(--okbg);color:var(--ok)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold2)}
+.card h4{margin:14px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+select,input[type=text],input[type=number],textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit}
+textarea{min-height:86px;resize:vertical}
+input[type=color]{width:100%;height:40px;border:1px solid var(--line);border-radius:9px;padding:3px;background:#fff}
+input[type=range]{width:100%}
+.pick{display:block;border:1.5px dashed #cdbf9b;border-radius:11px;padding:14px;text-align:center;cursor:pointer;background:#fdfaf2;font-size:13.5px}
+.pick b{display:block;font-size:14px}.pick span{color:var(--muted);font-size:12px}
+.pick input{display:none}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:99px;padding:9px 15px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sub-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.sub-tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 13px;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer}
+.sub-tab.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.panel,.sub-panel{display:none}.panel.on,.sub-panel.on{display:block}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;background:var(--ink);color:#fff}
+.btn.gold{background:var(--gold)}.btn.light{background:#f1ece0;color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+.status{margin-top:10px;font-size:13px;color:var(--muted);word-break:break-word}
+.prog{height:6px;background:#eee6d4;border-radius:9px;overflow:hidden;margin-top:8px;display:none}
+.prog i{display:block;height:100%;width:0;background:var(--gold);transition:width .15s}
+.chk{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border-radius:10px;margin:6px 0;font-size:13.5px}
+.chk .ic{font-weight:800;width:20px;flex:0 0 20px;text-align:center}
+.chk.ok{background:var(--okbg);color:#14532d}.chk.bad{background:var(--badbg);color:#7a1a12}.chk.warn{background:var(--warnbg);color:#6b3d05}.chk.info{background:var(--infobg);color:#1e3a8a}
+.chk small{display:block;opacity:.85;margin-top:2px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin:8px 0}
+.kv div{background:#fcfaf4;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.kv span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.kv b{font-size:14px}
+canvas.pv{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#ddd}
+.res{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin-top:8px;background:#fffdf7;font-size:13px}
+.res a,.res button{background:var(--gold);color:#fff;text-decoration:none;border:0;border-radius:8px;padding:8px 12px;font-weight:700;font-size:12.5px;cursor:pointer}
+.res button{background:#f1ece0;color:var(--ink)}
+table.rules{width:100%;border-collapse:collapse;font-size:12.8px;margin:6px 0 14px}
+table.rules th,table.rules td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+table.rules th{background:#f6efdc;width:34%}
+details{margin-top:8px}summary{cursor:pointer;font-weight:700;font-size:13.5px}
+.sec-list{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;font-size:12.5px;margin-top:8px}
+.sec-list div{display:flex;justify-content:space-between;gap:8px;padding:5px 10px;border-bottom:1px solid #f1ebdc}
+.hide{display:none!important}
+.inline-check{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13.5px}
+.input-with-auto{position:relative}
+.input-with-auto input{padding-right:64px}
+.input-with-auto label{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center;margin:0;text-transform:none}
+.sw-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #cdbf9b;cursor:pointer;padding:0}
+.sw.on{box-shadow:0 0 0 3px var(--ink)}
+.autoTag{font-size:12.5px;color:var(--muted)}
+.xr-pager{display:grid;grid-template-columns:90px 1fr 90px;gap:8px;align-items:center;margin:12px 0 8px}
+.xr-pager .btn{padding:9px 6px}
+.xr-lab{text-align:center;font-size:13px;font-weight:700}
+.xr-box{background:#e7e2d6;border-radius:10px;padding:12px;max-height:540px;overflow:auto}
+.xr-sheet{background:#fff;margin:0 auto;box-shadow:0 3px 12px rgba(0,0,0,.2);overflow:hidden}
+.xr-sheet img{display:block;width:100%;height:auto}
+.xr-jump{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px;font-size:13px}
+.xr-jump input{width:90px;text-align:center}
+.xr-banner{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:13px;display:none}
+.xr-banner.ok{display:block;background:var(--okbg);color:var(--ok)}
+.xr-banner.warn{display:block;background:var(--warnbg);color:var(--warn)}
+.modal-bg{position:fixed;inset:0;background:rgba(28,27,25,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal-bg.open{display:flex}
+.modal-card{background:#fff;border:1px solid var(--line);border-radius:16px;max-width:480px;width:100%;padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.22)}
+.modal-card h3{margin:0 0 6px;font-size:17px;color:var(--ink);text-transform:none;letter-spacing:0}
+.modal-card p{margin:0 0 12px;font-size:13.5px;color:var(--muted)}
 
+.card.collapsible>h3{cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.card.collapsible>h3::after{content:"▾";font-size:15px;transition:transform .15s}
+.card.collapsible.closed>h3::after{transform:rotate(-90deg)}
+.card.collapsible.closed>*:not(h3){display:none!important}
+.tab-note{font-size:12.5px;color:var(--muted);margin:-4px 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="top-bar">
+    <div>
+      <span class="badge">AHK Book World · v6</span>
+      <span class="badge pro" id="playLicenseBadge">Free Preview</span>
+    </div>
+    <button type="button" class="play-pill" id="openBillingBtn">Play Store Pro Unlock</button>
+  </div>
+  <h1>AHK Book Maker</h1>
+  <p>Load any manuscript (PDF, DOCX, HTML, TXT, Images) &amp; cover art once. Run Pre-flight, build exact-size Print PDFs, design KDP/Pothi Covers (Paperback ↔ Hardcover auto-adjust), or export Same-to-Same Xerox &amp; Reflowable eBooks.</p>
+</header>
+
+<!-- SHARED BOOK INPUTS -->
+<div class="card" id="sharedBook">
+  <h3 id="sharedTitle">Your Book</h3>
+  <div class="tab-note" id="sharedNote"></div>
+  <div class="grid">
+    <label class="pick" data-for="pre int"><b id="pdfLabel">1. Manuscript</b><span id="pdfSub">PDF · DOCX · HTML · TXT · Images</span><input type="file" id="pdfIn" multiple accept=".pdf,.docx,.html,.htm,.txt,.png,.jpg,.jpeg,.webp,.gif,.bmp,application/pdf,image/*" /></label>
+    <label class="pick" data-for="pre cov"><b id="frontLabel">2. Front cover art</b><span id="frontSub">PNG / JPG / WEBP</span><input type="file" id="frontIn" accept="image/*" /></label>
+    <label class="pick" data-for="pre cov"><b id="backLabel">3. Back cover art (optional)</b><span>Leave empty to auto-build</span><input type="file" id="backIn" accept="image/*" /></label>
+  </div>
+  <div class="grid" data-for="pre cov epub" style="margin-top:12px">
+    <div class="field"><label>Title</label><input type="text" id="bkTitle" value="Now or Never" /></div>
+    <div class="field"><label>Subtitle</label><input type="text" id="bkSub" value="Change Yourself to Change Your Life" /></div>
+    <div class="field"><label>Author</label><input type="text" id="bkAuthor" value="Abdul Hameed Kunhi" /></div>
+  </div>
+  <div id="pdfSummary" class="status" data-for="pre int cov"></div>
+  <div id="libStatus" class="status">Loading libraries…</div>
+</div>
+
+<!-- MAIN NAVIGATION -->
+<div class="tabs" id="tabs">
+  <button class="tab on" data-t="pre">1 · Check</button>
+  <button class="tab" data-t="int">2 · Manuscript</button>
+  <button class="tab" data-t="cov">3 · Cover</button>
+  <button class="tab" data-t="epub">4 · eBook</button>
+  <button class="tab" data-t="rules">5 · Rules</button>
+</div>
+
+<!-- ============ TAB 1: PRE-FLIGHT ============ -->
+<div class="panel on" id="p-pre">
+  <div class="card">
+    <h3>Store Pre-flight Check</h3>
+    <div class="grid">
+      <div class="field"><label>Where are you publishing?</label>
+        <select id="pfTarget">
+          <option value="kdp_pb">Amazon KDP – Paperback</option>
+          <option value="kdp_hc">Amazon KDP – Hardcover</option>
+          <option value="kdp_eb">Amazon KDP – Kindle eBook</option>
+          <option value="pothi">Pothi – Print book</option>
+        </select>
+      </div>
+    </div>
+    <div class="row"><button class="btn gold" id="pfRun">Run pre-flight check</button></div>
+    <div class="hint">Checks your loaded manuscript and cover art against KDP and Pothi technical rules and tells you which tab fixes any issue.</div>
+    <div id="pfOut"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 2: INTERIOR PDF ============ -->
+<div class="panel" id="p-int">
+  <div class="card">
+    <h3>Print Interior PDF – Exact Trim &amp; Margins</h3>
+    <div class="grid">
+      <div class="field"><label>Target Store</label>
+        <select id="inTarget">
+          <option value="kdp_pb" selected>Amazon KDP Paperback</option>
+          <option value="kdp_hc">Amazon KDP Hardcover</option>
+          <option value="pothi">Pothi Print</option>
+          <option value="other">Other / Generic</option>
+        </select>
+      </div>
+      <div class="field"><label>Trim size</label>
+        <select id="inTrim">
+          <option value="6x9" selected>6" × 9" (KDP &amp; Pothi)</option>
+          <option value="5.5x8.5">5.5" × 8.5"</option>
+          <option value="5x8">5" × 8"</option>
+          <option value="5.25x8">5.25" × 8"</option>
+          <option value="5.06x7.81">5.06" × 7.81"</option>
+          <option value="6.14x9.21">6.14" × 9.21"</option>
+          <option value="7x10">7" × 10"</option>
+          <option value="8x10">8" × 10"</option>
+          <option value="8.25x11">8.25" × 11"</option>
+          <option value="8.5x11">8.5" × 11"</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+      <div class="field hide" id="inCustom"><label>Custom W × H (in)</label>
+        <div style="display:flex;gap:6px"><input type="number" id="inCW" value="6" step="0.001" min="1" max="20" /><input type="number" id="inCH" value="9" step="0.001" min="1" max="20" /></div>
+      </div>
+      <div class="field"><label>Bleed</label>
+        <select id="inBleed">
+          <option value="0" selected>No bleed (text-only book – recommended)</option>
+          <option value="1">With bleed (+0.125" outside, top, bottom)</option>
+          <option value="c">Custom bleed…</option>
+        </select>
+      </div>
+      <div class="field hide" id="inBleedBox"><label>Bleed per side (in)</label><input type="number" id="inBleedIn" value="0.125" step="0.005" min="0" max="1" /></div>
+    </div>
+
+    <h4>Gutter &amp; Margin Controls</h4>
+    <div class="grid">
+      <div class="field"><label>Gutter (inside margin shift)</label>
+        <select id="inGutterMode">
+          <option value="auto" selected>Auto – shift only if gutter too small</option>
+          <option value="manual">Manual – shift by exact inches below</option>
+          <option value="none">Never shift pages</option>
+        </select>
+        <input type="number" id="inShiftManual" value="0" step="0.001" min="0" max="1" placeholder="inch" style="margin-top:6px" disabled />
+      </div>
+      <div class="field"><label>Margin Audit Behavior</label>
+        <select id="inMarginSkip">
+          <option value="0" selected>Measure &amp; warn</option>
+          <option value="1">Skip check – build immediately</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn light" id="inAudit" disabled>Measure margins</button>
+      <button class="btn gold" id="inGo" disabled>Create exact-size print PDF</button>
+    </div>
+    <div class="prog" id="inProg"><i></i></div>
+    <div id="inStatus" class="status"></div>
+    <div id="inOut"></div>
+    <div id="inRes"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 3: COVER STUDIO ============ -->
+<div class="panel" id="p-cov">
+  <div class="card">
+    <h3>Cover Studio – Dimensions &amp; Error Solver</h3>
+    <div class="grid">
+      <div class="field"><label>Cover target</label>
+        <select id="cvTarget">
+          <option value="kdp_pb" selected>KDP Paperback – full wrap (PDF)</option>
+          <option value="kdp_hc">KDP Hardcover – full wrap (PDF)</option>
+          <option value="pothi">Pothi – full print wrap</option>
+          <option value="front_only">Front cover only</option>
+          <option value="back_only">Back cover only</option>
+          <option value="ebook">Kindle / Pothi eBook – front JPG</option>
+          <option value="custom">Custom full wrap size…</option>
+        </select>
+      </div>
+      <div class="field print"><label>Trim size</label>
+        <select id="cvTrim">
+          <option value="6x9" selected>6" × 9"</option><option value="5.5x8.5">5.5" × 8.5"</option><option value="5x8">5" × 8"</option>
+          <option value="5.25x8">5.25" × 8"</option><option value="6.14x9.21">6.14" × 9.21"</option><option value="7x10">7" × 10"</option>
+          <option value="8x10">8" × 10"</option><option value="8.25x11">8.25" × 11"</option><option value="8.5x11">8.5" × 11"</option>
+          <option value="custom">Custom size…</option>
+        </select>
+      </div>
+      <div class="field single-side hide"><label>Bleed (+0.125" per side)</label>
+        <select id="cvSideBleed">
+          <option value="0" selected>Exact trim size (no bleed)</option>
+          <option value="1">With 0.125" bleed</option>
+          <option value="custom">Custom bleed…</option>
+        </select>
+      </div>
+      <div class="field hide" id="cvCustomSB"><label>Bleed per side (in)</label><input type="number" id="cvSBin" value="0.125" step="0.005" min="0" max="1" /></div>
+      <div class="field hide" id="cvCustomTrim"><label>Custom trim W × H (in)</label>
+        <div style="display:flex;gap:6px"><input type="number" id="cvCW" value="6" step="0.001" min="1" max="20" /><input type="number" id="cvCH" value="9" step="0.001" min="1" max="20" /></div>
+      </div>
+      <div class="field print"><label>Interior pages</label><input type="number" id="cvPages" value="200" min="24" max="828" /></div>
+      <div class="field print kdp"><label>Paper / ink (spine thickness)</label>
+        <select id="cvPaper">
+          <option value="0.002252" selected>White – B&amp;W (0.002252"/page)</option>
+          <option value="0.0025">Cream – B&amp;W (0.0025"/page)</option>
+          <option value="0.002347">White – Premium colour (0.002347"/page)</option>
+          <option value="0.002268">Groundwood – B&amp;W (0.002268"/page)</option>
+          <option value="custom">Custom thickness…</option>
+        </select>
+      </div>
+      <div class="field hide" id="cvCustomThk"><label>Thickness per page (in)</label><input type="number" id="cvThk" value="0.002252" step="0.000001" min="0.001" max="0.005" /></div>
+
+      <!-- Custom Wrap Box -->
+      <div class="field hide" id="customWrapBox" style="grid-column:1/-1">
+        <div class="grid">
+          <div class="field"><label>Finished Wrap W × H (in)</label><div style="display:flex;gap:6px"><input type="number" id="cuW" value="12.5" step="0.01" /><input type="number" id="cuH" value="9" step="0.01" /></div></div>
+          <div class="field"><label>Bleed per side (in)</label><input type="number" id="cuB" value="0.125" step="0.01" /></div>
+          <div class="field"><label>Trim W × H inside (in)</label><div style="display:flex;gap:6px"><input type="number" id="cuTW" value="6" step="0.01" /><input type="number" id="cuTH" value="9" step="0.01" /></div></div>
+          <div class="field"><label>Spine width (in)</label><input type="number" id="cuS" value="0.5" step="0.001" /></div>
+        </div>
+      </div>
+
+      <!-- Pothi Specific Fields -->
+      <div class="field pothi-only hide"><label>Pothi binding</label><select id="pBind"><option value="soft" selected>Softcover / paperback</option><option value="hard">Hardcover / manual numbers</option></select></div>
+      <div class="field pothi-only hide"><label>Pothi "expected" width (in)</label><input type="number" id="pW" value="12.25" step="0.01" min="2" max="40" /></div>
+      <div class="field pothi-only hide"><label>Pothi "expected" height (in)</label><input type="number" id="pH" value="9" step="0.01" min="2" max="30" /></div>
+      <div class="field pothi-only hide"><label>Spine width (in) – 3rd number</label><input type="number" id="pS" value="0.25" step="0.001" min="0" max="3" /></div>
+      <div class="field pothi-only hide"><label>Bleed per side (in) – Pothi = 0.2</label><input type="number" id="pB" value="0.2" step="0.01" min="0" max="1" /></div>
+      <div class="field pothi-only hide" style="grid-column:1/-1"><label>Paste Pothi's error message (auto-fills numbers)</label><input type="text" id="pPaste" placeholder="Cover size expected: (12.25, 9.0, 0.25). Cover uploaded: (10.65, 7.4)…" /></div>
+    </div>
+
+    <!-- Exact File Override & OCR Screenshot Solver -->
+    <div class="grid wrapT" style="margin-top:10px">
+      <div class="field"><label>Exact cover FILE width (in) – optional</label><input type="number" id="kW" step="0.001" min="0" placeholder="auto" /></div>
+      <div class="field"><label>Exact cover FILE height (in) – optional</label><input type="number" id="kH" step="0.001" min="0" placeholder="auto" /></div>
+      <div class="field" style="grid-column:1/-1"><label>Or upload a screenshot of KDP / Pothi error – auto-reads dimensions</label><input type="file" id="kImg" accept="image/*" /></div>
+      <div class="field" style="grid-column:1/-1"><button type="button" class="btn light" id="kClear">Clear exact size override (back to auto)</button></div>
+    </div>
+
+    <div class="grid kdp" style="margin-top:8px">
+      <div class="field" style="grid-column:1/-1"><label>Paste KDP's size error (auto-solves spine)</label><input type="text" id="kPaste" placeholder="Your expected cover size is 14.269x10.417 but the submitted file size is 14.177x10.417" /></div>
+      <div class="field"><label>Spine width override (in) – blank = auto</label><input type="number" id="kSpine" step="0.001" min="0" max="4" placeholder="auto" /></div>
+      <div class="field"><label>&nbsp;</label><button type="button" class="btn light" id="kFill">Match KDP's expected size</button></div>
+    </div>
+        <div class="card" style="margin-top:10px;background:#fdfaf2">
+      <h4 style="margin-top:0">Safe edges &amp; barcode space (fix KDP "too close to edge" / "unable to place barcode")</h4>
+      <div class="grid">
+        <div class="field"><label>Outside-edge margin (in) – blank = auto</label><input type="number" id="mgOut" step="0.001" min="0" max="2" placeholder="auto (PB 0.375 · HC 0.716)" /></div>
+        <div class="field"><label>Spine-side margin (in) – blank = auto</label><input type="number" id="mgSpine" step="0.001" min="0" max="2" placeholder="auto (PB 0.125 · HC 0.4)" /></div>
+      </div>
+      <label class="inline-check"><input type="checkbox" id="cvBcSoft" /> Blend a plain clear area for the barcode (use when KDP says "unable to place a barcode")</label>
+      <div class="grid" style="margin-top:8px">
+        <div class="field" style="grid-column:1/-1"><label>Auto-adjust: paste KDP's error text</label><textarea id="kErrText" placeholder="Paste the KDP cover error here (margin / trim / barcode)…"></textarea></div>
+        <div class="field"><label>or upload error screenshot</label><input type="file" id="kErrImg" accept="image/*" /></div>
+        <div class="field"><label>&nbsp;</label><button type="button" class="btn gold" id="kErrApply">Auto-adjust from error</button></div>
+      </div>
+      <div class="hint" id="kErrInfo">Type the margins yourself, or let the app read KDP's message. Then re-export the cover.</div>
+    </div>
+    <div class="hint kdp" id="kInfo">Paste KDP's error message or upload a screenshot to lock onto KDP's exact required dimensions.</div>
+
+    <div class="row">
+      <button type="button" class="btn light" id="cvAutoPbToHc">Auto-adjust Paperback → Hardcover (within lines)</button>
+      <button type="button" class="btn light hide" id="cvAutoHcToPb">Switch back to Paperback</button>
+    </div>
+    <label class="inline-check"><input type="checkbox" id="cvArtInsideRed" checked /> Keep front &amp; back art strictly inside red trim line (wrap margin uses matched tint)</label>
+    <label class="inline-check"><input type="checkbox" id="cvSafeWithinLines" checked /> Keep text, title &amp; key art strictly inside green safe lines</label>
+
+    <div class="row pothi-only hide">
+      <button type="button" class="btn light" id="pFill">Fill from pasted Pothi error</button>
+      <button type="button" class="btn light" id="pSpineAuto">Spine from pages (0.001968″ × pages)</button>
+    </div>
+    <div class="kv" id="cvSpecs"></div>
+  </div>
+
+  <!-- Front Art Card -->
+  <div class="card front-card">
+    <h3>Front Art &amp; Clean-Up</h3>
+    <div class="grid">
+      <div class="field"><label>How to fit your art</label>
+        <select id="cvFit">
+          <option value="extend" selected>Fit full height + extend sides (no cropping)</option>
+          <option value="fill">Fill &amp; crop edges</option>
+          <option value="contain">Keep inside trim (solid margin)</option>
+        </select>
+      </div>
+      <div class="field"><label>Vertical position (Fill mode)</label>
+        <select id="cvAnchor"><option value="0">Top</option><option value="0.5" selected>Centre</option><option value="1">Bottom</option></select>
+      </div>
+      <div class="field"><label>Nudge left / right (in)</label><input type="range" id="cvNx" min="-0.5" max="0.5" step="0.01" value="0" /></div>
+      <div class="field"><label>Nudge up / down (in)</label><input type="range" id="cvNy" min="-0.5" max="0.5" step="0.01" value="0" /></div>
+    </div>
+    <label class="inline-check"><input type="checkbox" id="cvClean" /> Remove small corner mark (AI sparkle / watermark) from art</label>
+    <div class="grid hide" id="cleanBox" style="margin-top:8px">
+      <div class="field"><label>Mark X %</label><input type="number" id="clX" value="80.6" step="0.1" /></div>
+      <div class="field"><label>Mark Y %</label><input type="number" id="clY" value="89.1" step="0.1" /></div>
+      <div class="field"><label>Width %</label><input type="number" id="clW" value="7.6" step="0.1" /></div>
+      <div class="field"><label>Height %</label><input type="number" id="clH" value="4.3" step="0.1" /></div>
+      <div class="field"><label>Copy clean pixels from (% offset)</label><input type="number" id="clD" value="7.9" step="0.1" /></div>
+    </div>
+    <label class="inline-check"><input type="checkbox" id="cvSharp" checked /> Light sharpening after upscaling</label>
+  </div>
+
+  <!-- Back, Spine & Barcode Card -->
+  <div class="card print-card">
+    <h3>Back, Spine, Auto-Colour &amp; Barcode</h3>
+    <div class="grid">
+      <div class="field back-bg-field"><label>Back + spine background</label>
+        <select id="cvBg"><option value="blur" selected>Soft blurred version of front art</option><option value="solid">Solid colour</option></select>
+      </div>
+      <div class="field"><label>Background colour mode</label>
+        <select id="cvBgMode"><option value="auto" selected>Auto – match my cover edge</option><option value="manual">Manual – I choose</option></select>
+      </div>
+      <div class="field"><label>Colour (auto fills · tap to override)</label><input type="color" id="cvTint" value="#0f172a" /></div>
+      <div class="field back-bg-field"><label>Tint strength</label><input type="range" id="cvTintA" min="0" max="0.9" step="0.05" value="0.55" /></div>
+      <div class="field spine-field"><label>Spine text</label><input type="text" id="cvSpineTxt" placeholder="auto: TITLE · AUTHOR" /></div>
+      <div class="field"><label>Text colour</label>
+        <select id="cvTxtCol"><option value="auto" selected>Auto (best contrast)</option><option value="#ffffff">White</option><option value="#111111">Dark</option></select>
+      </div>
+      <div class="field"><label>Font</label>
+        <select id="cvFont"><option value="Georgia, 'Times New Roman', serif" selected>Georgia (serif)</option><option value="Arial, Helvetica, sans-serif">Arial (sans)</option></select>
+      </div>
+    </div>
+    <div class="sw-row"><span class="autoTag" id="cvAutoTag">Auto colour appears after you load the front cover.</span><span id="cvSwatches" style="display:contents"></span></div>
+    <div class="grid" style="margin-top:10px">
+      <div class="field"><label>Back headline</label><input type="text" id="cvBackHead" placeholder="e.g. Your life will not change by waiting." /></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>Back cover blurb (blank line = new paragraph)</label><textarea id="cvBlurb" placeholder="Write the book description here…"></textarea></div>
+    <label class="inline-check"><input type="checkbox" id="cvBarcode" checked /> Reserve a clear light barcode box on the back (KDP needs 2" × 1.2" – keep ON for KDP)</label>
+    <label class="inline-check"><input type="checkbox" id="cvBcDraw" /> Draw a visible barcode box in the exported file (off = margin only: text stays out of the area, nothing is painted there)</label>
+    <label class="inline-check"><input type="checkbox" id="cvBcNoCutText" checked /> Barcode never cuts words, text or letters (auto-fits text above barcode)</label>
+    <div class="grid" style="margin-top:8px">
+      <div class="field"><label>Barcode box W × H (in)</label><div style="display:flex;gap:6px"><input type="number" id="bcW" value="2.5" step="0.1" min="2" max="5" /><input type="number" id="bcH" value="1.5" step="0.1" min="1.2" max="4" /></div></div>
+      <div class="field"><label>Box colour</label><input type="color" id="bcCol" value="#ffffff" /></div>
+    </div>
+  </div>
+
+  <!-- Preview & Export Card -->
+  <div class="card">
+    <h3>App Icon &amp; Small Image Sizes (192 / 512 · PNG, JPEG, PDF)</h3>
+    <div class="hint">Make Play Store / app icons or any small square image from your cover art or another picture. 512 × 512 is the Play Store icon; 192 × 192 is the app icon.</div>
+    <div class="grid">
+      <div class="field"><label>Source image</label><select id="icSrcSel"><option value="front">Front cover art</option><option value="back">Back cover art</option><option value="own">Upload another image…</option></select></div>
+      <div class="field"><label>Upload image (if chosen)</label><input type="file" id="icFile" accept="image/*" /></div>
+      <div class="field"><label>Fit</label><select id="icFit"><option value="crop">Crop to square (centre)</option><option value="fit">Fit whole image (add background)</option></select></div>
+      <div class="field"><label>Background (for Fit / JPEG)</label><input type="color" id="icBg" value="#ffffff" /></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label class="inline-check"><input type="checkbox" id="ic192" checked /> 192 × 192</label>
+      <label class="inline-check"><input type="checkbox" id="ic512" checked /> 512 × 512</label>
+      <label class="inline-check">Custom px <input type="number" id="icCustom" min="16" max="4096" style="width:90px" /></label>
+    </div>
+    <div class="row">
+      <label class="inline-check"><input type="checkbox" id="icPng" checked /> PNG</label>
+      <label class="inline-check"><input type="checkbox" id="icJpg" /> JPEG</label>
+      <label class="inline-check"><input type="checkbox" id="icPdf" /> PDF</label>
+    </div>
+    <div class="row"><button class="btn gold" id="icGo">Make icon files</button></div>
+    <div id="icStatus" class="status"></div>
+    <div id="icRes"></div>
+  </div>
+  <div class="card">
+    <h3>Live Preview &amp; Export</h3>
+    <label class="inline-check"><input type="checkbox" id="cvGuides" checked /> Show guides in preview (trim, bleed, spine, safe zone, barcode) – never exported</label>
+    <div style="margin-top:10px"><canvas class="pv" id="cvPreview" width="10" height="10"></canvas></div>
+    <div id="cvInfo" class="status"></div>
+    <div class="grid" style="margin-top:10px">
+      <div class="field"><label>Export format</label>
+        <select id="cvFormat"><option value="pdf" selected>PDF (print-ready, 300 dpi)</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="all">PDF + JPG + PNG</option></select>
+      </div>
+      <div class="field"><label>Export resolution</label>
+        <select id="cvDpi"><option value="auto" selected>Auto (300 dpi, safe memory scaling)</option><option value="200">200 dpi (smaller file)</option><option value="150">150 dpi (smallest)</option></select>
+      </div>
+      <div class="hint hide" id="cvHcWarn">KDP hardcover supports specific trim sizes (commonly 5.5×8.5, 6×9, 6.14×9.21, 7×10, 8.25×11). Confirm in KDP before uploading.</div>
+    </div>
+    <div class="row">
+      <button class="btn gold" id="cvExport" disabled>Export cover</button>
+      <button class="btn light" id="cvExportFront" disabled>Also export Kindle eBook cover (JPG)</button>
+    </div>
+    <div class="prog" id="cvProg"><i></i></div>
+    <div id="cvStatus" class="status"></div>
+    <div id="cvCheck"></div>
+    <div id="cvRes"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 4: EBOOK STUDIO (XEROX + REFLOWABLE) ============ -->
+<div class="panel" id="p-epub">
+  <div class="card"><h3>Upload manuscript (for both eBook types)</h3>
+    <div class="grid"><label class="pick"><b id="xrFileLabel">Upload manuscript for eBook</b><span id="xrFileSub">PDF · DOCX · HTML · TXT (ODT / RTF: Same-to-Same only)</span><input type="file" id="xrFile" accept=".pdf,.docx,.odt,.html,.htm,.rtf,.txt,application/pdf,text/plain,text/html" /></label></div>
+  </div>
+  <div class="sub-tabs">
+    <button class="sub-tab on" data-sub="xerox">1 · Same-to-Same Xerox eBook</button>
+    <button class="sub-tab" data-sub="reflow">2 · Reflowable EPUB 3</button>
+  </div>
+
+  <!-- Sub-panel 1: Same-to-Same Xerox eBook -->
+  <div class="sub-panel on" id="sp-xerox">
+    <div class="card">
+      <h3>Same-to-Same eBook (Xerox Pages) – Kindle &amp; Pothi</h3>
+      <div class="chk info"><span class="ic">i</span><div>Every page of your book is kept 100% identical – exact page numbers, layout, and typography – packed into a fixed-layout EPUB or compressed proof PDF. Uses the manuscript you upload above.</div></div>
+      <div id="xrBanner" class="xr-banner"></div>
+      <div class="grid" style="margin-top:10px">
+        <div class="field"><label>Trim size &amp; ratio lock</label>
+          <select id="xrAspect">
+            <option value="auto" selected>Match source (exact)</option>
+            <option value="5.5x8.5">KDP / Pothi 5.5" × 8.5"</option>
+            <option value="6x9">KDP / Pothi 6" × 9"</option>
+            <option value="a4">A4</option>
+          </select>
+        </div>
+        <div class="field"><label>Max eBook size (auto-compress)</label>
+          <select id="xrMax">
+            <option value="15">15 MB (ultra-fast upload)</option>
+            <option value="25">25 MB (fast upload)</option>
+            <option value="50" selected>50 MB (Kindle &amp; Pothi safe)</option>
+            <option value="100">100 MB (high detail)</option>
+          </select>
+        </div>
+        <div class="field"><label>Language code</label><input type="text" id="xrLang" value="en" /></div>
+      </div>
+      <div class="row">
+        <button class="btn light" id="xrUseLoaded" disabled>Use manuscript from Manuscript tab</button>
+        <button class="btn gold" id="xrEpubBtn" disabled>Download same-to-same .EPUB</button>
+        <button class="btn light" id="xrPdfBtn" disabled>Download compressed .PDF (proof)</button>
+      </div>
+      <div id="xrLog" class="status">Load your manuscript at the top of the page, then open this tab – pages render here automatically.</div>
+      <div id="xrRes"></div>
+    </div>
+    <div class="card">
+      <div class="xr-pager">
+        <button class="btn light" id="xrPrev" disabled>← Prev</button>
+        <div class="xr-lab" id="xrLabel">Page 0 of 0</div>
+        <button class="btn light" id="xrNext" disabled>Next →</button>
+      </div>
+      <div class="xr-box" id="xrBox"><div class="xr-sheet" style="padding:20px"><p>Page preview will appear here.</p></div></div>
+      <div class="xr-jump"><span>Jump to page:</span><input type="number" id="xrJump" min="1" value="1" /><button class="btn light" id="xrJumpBtn" disabled>Go</button></div>
+    </div>
+  </div>
+
+  <!-- Sub-panel 2: Reflowable EPUB 3 -->
+  <div class="sub-panel" id="sp-reflow">
+    <div class="card">
+      <h3>Reflowable EPUB 3 – Kindle Enhanced Typesetting</h3>
+      <div class="chk info"><span class="ic">i</span><div>Extracts chapters, parts, headings, and paragraphs into reflowable XHTML so readers can resize fonts on Kindle, Kobo, and Apple Books. Note: KDP does not allow switching a title between fixed-layout and reflowable after creation.</div></div>
+      <div class="grid" style="margin-top:8px">
+        <div class="field"><label>Language code</label><input type="text" id="epLang" value="en" /></div>
+        <div class="field"><label>Publisher (optional)</label><input type="text" id="epPub" /></div>
+      </div>
+      <label class="inline-check"><input type="checkbox" id="epCover" checked /> Embed cover image (from Cover Studio)</label>
+      <label class="inline-check"><input type="checkbox" id="epFront" checked /> Keep copyright / front matter pages</label>
+      <div class="hint">Upload your manuscript in the box at the top of this tab, then press 1 · Analyse. Buttons stay greyed out until a manuscript is loaded.</div>
+      <div class="row">
+        <button class="btn light" id="epAnalyze" disabled>1 · Analyse book structure</button>
+        <button class="btn gold" id="epBuild" disabled>2 · Build reflowable .EPUB</button>
+      </div>
+      <div class="prog" id="epProg"><i></i></div>
+      <div id="epStatus" class="status"></div>
+      <div id="epReport"></div>
+      <div id="epRes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 5: ALL REQUIREMENTS ============ -->
+<div class="panel" id="p-rules">
+  <div class="card">
+    <h3>Every Publishing Requirement in One Place</h3>
+    <b>Kindle eBook – Manuscript</b>
+    <table class="rules">
+      <tr><th>Same-to-Same EPUB</th><td>Fixed-layout pre-paginated EPUB 3: every PDF page becomes one page so page numbers and layout stay identical to your print book.</td></tr>
+      <tr><th>Reflowable EPUB</th><td>Standard EPUB 3 with chapter navigation and Enhanced Typesetting support.</td></tr>
+      <tr><th>Layout lock</th><td>A fixed-layout draft on KDP cannot be updated with a reflowable file (or vice versa).</td></tr>
+      <tr><th>AI disclosure</th><td>Answer Yes if text, images, or translation were AI-generated.</td></tr>
+    </table>
+    <b>Kindle &amp; Pothi eBook – Cover</b>
+    <table class="rules">
+      <tr><th>Format</th><td>JPEG or TIFF only (not PNG), RGB colour, no transparency</td></tr>
+      <tr><th>Size</th><td>Ideal 2,560 px high × 1,600 px wide (Minimum 1,000 × 625, height ÷ width ≥ 1.6)</td></tr>
+      <tr><th>Quality</th><td>300 dpi recommended, under 50 MB</td></tr>
+    </table>
+    <b>KDP Paperback &amp; Hardcover</b>
+    <table class="rules">
+      <tr><th>Interior PDF</th><td>Exact trim size (e.g., 6 × 9 in = 432 × 648 pt), fonts embedded, 24–828 pages</td></tr>
+      <tr><th>Margins</th><td>Outside/top/bottom ≥ 0.25" (0.375" with bleed). Gutter: 24–150p 0.375", 151–300p 0.5", 301–500p 0.625", 501–700p 0.75", 701–828p 0.875"</td></tr>
+      <tr><th>Hardcover wrap</th><td>Includes board overhang and wrap bleed; keep text and key art inside the green safe zone</td></tr>
+      <tr><th>Barcode</th><td>Plain, light, solid 2" × 1.2" area at bottom-right of back cover, clear of text</td></tr>
+    </table>
+    <b>Pothi Print</b>
+    <table class="rules">
+      <tr><th>Interior PDF</th><td>Exact chosen trim size, fonts embedded, 300 dpi</td></tr>
+      <tr><th>Cover</th><td>Single full-wrap file at 300 dpi. Add 0.2" bleed on all four sides around Pothi's expected finished size. Spine = 0.001968″ × pages (softcover).</td></tr>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<div class="card" id="legalNote" style="font-size:12px;color:var(--muted)">
+  <b>Notice:</b> AHK Book Maker is an independent tool and is not affiliated with, sponsored or endorsed by Amazon, Kindle Direct Publishing (KDP), Pothi or any other publishing platform. Amazon, Kindle and KDP are trademarks of Amazon.com, Inc. or its affiliates; Pothi and other names belong to their respective owners. They are used only to describe file formats these services accept. Platform rules change, so always confirm current requirements with the platform before uploading. Your files are processed on your device and are not uploaded to our servers.
+</div>
+<!-- ============ PLAY STORE BILLING MODAL ============ -->
+<div class="modal-bg" id="playModal" role="dialog" aria-modal="true" aria-labelledby="playModalTitle">
+  <div class="modal-card">
+    <h3 id="playModalTitle">Unlock AHK Book Maker Pro</h3>
+    <p>In the Google Play Store build, exports (Print PDF, Cover Wrap/JPG/PNG, and Same-to-Same / Reflowable EPUB) use Google Play Billing (<code>ahk_studio_pro_unlock</code>) tied to your Google Play account. Pre-flight checks, structure analysis, and live previews are free to test first.</p>
+    <div class="kv" style="margin-bottom:10px">
+      <div><span>Product ID</span><b id="playSkuLabel">ahk_studio_pro_unlock</b></div>
+      <div><span>Price</span><b id="playPriceLabel">Configured in Play Console</b></div>
+      <div><span>Status</span><b id="playStatusLabel">Locked (Preview)</b></div>
+    </div>
+    <div id="playBridgeNote" class="hint"></div>
+    <div class="row">
+      <button type="button" class="btn gold" id="playBuyBtn">Buy via Google Play</button>
+      <button type="button" class="btn light" id="playRestoreBtn">Restore purchase</button>
+      <button type="button" class="btn light" id="playCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== PLAY STORE BILLING BRIDGE ===================== */
+const PlayStore = (() => {
+  const SKU = 'ahk_studio_pro_unlock';
+  const STORAGE_KEY = 'ahk_play_entitlement_v1';
+  let state = { unlocked: false, source: 'preview', priceText: 'Play Console INR/USD', token: '' };
+  let pendingResolver = null;
+
+  function loadCachedEntitlement() {
+    if (!hasNativeBridge()) return; // never trust localStorage outside the signed Play app (editable by anyone)
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.unlocked === true) {
+        state.unlocked = true;
+        state.source = parsed.source || 'cached';
+        state.token = parsed.token || '';
+      }
+    } catch (e) {}
+  }
+
+  function saveEntitlement() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ unlocked: state.unlocked, source: state.source, token: state.token }));
+    } catch (e) {}
+  }
+
+  function hasNativeBridge() {
+    return Boolean(window.AHKPlayBridge && typeof window.AHKPlayBridge.purchasePro === 'function');
+  }
+
+  function updateUi() {
+    const badge = $('playLicenseBadge'), pill = $('openBillingBtn');
+    const st = $('playStatusLabel'), pr = $('playPriceLabel'), note = $('playBridgeNote');
+    if (state.unlocked) {
+      badge.textContent = 'Play Pro Active'; badge.classList.add('pro');
+      pill.textContent = 'Pro Unlocked ✓'; pill.classList.add('unlocked');
+      if (st) st.textContent = 'Unlocked (' + state.source + ')';
+    } else {
+      badge.textContent = 'Free Preview'; badge.classList.remove('pro');
+      pill.textContent = 'Play Store Pro Unlock'; pill.classList.remove('unlocked');
+      if (st) st.textContent = 'Locked (Preview)';
+    }
+    if (pr) pr.textContent = state.priceText;
+    if (note) {
+      note.textContent = hasNativeBridge()
+        ? 'Connected to native Android Google Play Billing bridge.'
+        : 'Running outside native Android Play Billing wrapper. Connect Capacitor/TWA Play Billing (window.AHKPlayBridge) before Play Store release.';
+    }
+  }
+
+  function openModal() { updateUi(); $('playModal').classList.add('open'); }
+  function closeModal() {
+    $('playModal').classList.remove('open');
+    if (pendingResolver) { const res = pendingResolver; pendingResolver = null; res(state.unlocked); }
+  }
+
+  function onNativeResult(payload) {
+    try {
+      const data = typeof payload === 'string' ? JSON.parse(payload) : (payload || {});
+      if (data.price) state.priceText = String(data.price);
+      if (data.unlocked === true || data.purchased === true) {
+        state.unlocked = true; state.source = data.source || 'google_play'; state.token = data.purchaseToken || '';
+        saveEntitlement();
+      }
+      updateUi();
+      if (pendingResolver) { const res = pendingResolver; pendingResolver = null; res(state.unlocked); }
+      if (state.unlocked) $('playModal').classList.remove('open');
+    } catch (e) { console.warn('Play bridge callback error:', e); }
+  }
+  window.onPlayBillingResult = onNativeResult;
+
+  function restorePurchases() {
+    if (hasNativeBridge() && typeof window.AHKPlayBridge.restorePurchases === 'function') {
+      window.AHKPlayBridge.restorePurchases(SKU);
+    } else { loadCachedEntitlement(); updateUi(); }
+  }
+
+  async function ensureUnlockedForExport(featureLabel) {
+    if (state.unlocked) return true;
+    openModal();
+    $('playBridgeNote').textContent = `"${featureLabel}" requires Google Play Pro unlock (${SKU}).`;
+    return await new Promise(resolve => { pendingResolver = resolve; });
+  }
+
+  function init() {
+    loadCachedEntitlement();
+    if (hasNativeBridge() && typeof window.AHKPlayBridge.queryProState === 'function') {
+      try { window.AHKPlayBridge.queryProState(SKU); } catch (e) {}
+    }
+    updateUi();
+    $('openBillingBtn').addEventListener('click', openModal);
+    $('playCloseBtn').addEventListener('click', closeModal);
+    $('playRestoreBtn').addEventListener('click', restorePurchases);
+    $('playBuyBtn').addEventListener('click', () => {
+      if (hasNativeBridge()) window.AHKPlayBridge.purchasePro(SKU);
+      else $('playBridgeNote').textContent = 'Google Play Billing launches inside the signed Android Play Store app (.aab) via window.AHKPlayBridge.purchasePro("' + SKU + '").';
+    });
+    $('playModal').addEventListener('click', e => { if (e.target === $('playModal')) closeModal(); });
+  }
+  return { init, ensureUnlockedForExport, isUnlocked: () => state.unlocked, onNativeResult };
+})();
+
+/* ===================== REFLOWABLE EPUB ENGINES (BookConv + EpubBuild) ===================== */
+(function (root) {
+  'use strict';
+  const SPACED = /^\S( \S)+$/;
+  const TERMINAL = /[.?!:;\u201D"\u2019')\]\u2026]$/;
+  const SMALL_WORDS = new Set(['a','an','and','as','at','but','by','for','in','nor','of','on','or','the','to','vs','with']);
+  function mode(arr){const m=new Map();arr.forEach(v=>m.set(v,(m.get(v)||0)+1));let best=null,bc=0;m.forEach((c,v)=>{if(c>bc){bc=c;best=v;}});return best;}
+  function letters(s){return String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+  function titleCase(s){const w=String(s).toLowerCase().split(/\s+/).filter(Boolean);let out=w.map((x,i)=>{const ac=i>0&&/[:\u2014\u2013\u00B7]$/.test(w[i-1]);return(i>0&&!ac&&SMALL_WORDS.has(x))?x:x.charAt(0).toUpperCase()+x.slice(1);}).join(' ');out=out.replace(/\bPart ([ivxIVX]+)\b/g,(m,r)=>'Part '+r.toUpperCase());return out;}
+  function cleanXml(s){return String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uFFFE\uFFFF]/g,'');}
+  function makeLine(items, fontItalic){
+    items.sort((a,b)=>a.x-b.x);
+    const h=Math.max.apply(null,items.map(i=>i.h||0));
+    const trimmed=items.map(i=>i.s.trim());
+    const singles=trimmed.filter(t=>/^[A-Z0-9]$/.test(t)).length;
+    const letterMode=items.length>=3&&singles>=items.length-1;
+    const tracked=letterMode||trimmed.some(t=>SPACED.test(t));
+    if(!tracked&&items.length>=2&&/^[A-Z]$/.test(trimmed[0])){
+      const f=items[0];
+      for(let k=1;k<items.length;k++){
+        const t=trimmed[k]; if(t==='')continue;
+        if(/^[A-Z0-9][A-Z0-9 .,;:'\u2019\u201C\u201D"!?\u2014\u2013-]*$/.test(t)&&/[A-Z]/.test(t)&&(items[k].h||0)<f.h*0.93) items[k].sc=true;
+        else break;
+      }
+    }
+    let text='';
+    if(letterMode){
+      const gaps=[];
+      for(let i=1;i<items.length;i++)gaps.push(items[i].x-(items[i-1].x+items[i-1].w));
+      const minGap=Math.min.apply(null,gaps);
+      text=items.map((it,i)=>(i>0&&gaps[i-1]>minGap*1.7+0.3?' ':'')+it.s.trim()).join('');
+    } else {
+      let prevEnd=null;
+      for(const it of items){
+        let piece=it.s;const t=piece.trim();
+        if(SPACED.test(t))piece=t.replace(/ /g,'');
+        else if(it.sc)piece=piece.toLowerCase().replace(/\bi\b/g,'I');
+        if(prevEnd!==null){const gap=it.x-prevEnd;if(gap>0.17*Math.max(it.h||0,h*0.8)&&!/\s$/.test(text)&&!/^\s/.test(piece))text+=' ';}
+        text+=piece;prevEnd=it.x+it.w;
+      }
+    }
+    text=text.replace(/\s+/g,' ').trim();
+    const italics=items.map(i=>fontItalic(i.f));
+    const known=italics.filter(v=>v!==null&&v!==undefined);
+    return {y:items[0].y,x0:items[0].x,x1:Math.max.apply(null,items.map(i=>i.x+i.w)),h,text,tracked,
+      upper:!/[a-z]/.test(text)&&/[A-Z]/.test(text),italic:known.length?known.every(v=>v):null,fontIds:items.map(i=>i.f)};
+  }
+  function groupLines(pg, fontItalic){
+    const its=pg.items.filter(i=>i.s.trim()!=='').sort((a,b)=>(b.y-a.y)||(a.x-b.x));
+    const rows=[];
+    for(const it of its){
+      const last=rows[rows.length-1];
+      const tol=Math.max(1.6,0.3*Math.min(it.h||8,(last&&last.h)||8));
+      if(last&&Math.abs(last.y-it.y)<=tol){last.items.push(it);last.h=Math.max(last.h,it.h||0);}
+      else rows.push({y:it.y,h:it.h||0,items:[it]});
+    }
+    return rows.map(r=>makeLine(r.items,fontItalic));
+  }
+  function segmentUpper(str,vocab){
+    const s=str.toLowerCase();const n=s.length;if(n<8)return str;
+    const best=new Array(n+1).fill(null);best[0]={cost:0,prev:-1};
+    for(let i=0;i<n;i++){
+      if(!best[i])continue;
+      for(let j=i+1;j<=Math.min(n,i+18);j++){
+        const w=s.slice(i,j);const f=vocab.get(w)||0;
+        if(!f&&!(j-i===1&&(w==='a'||w==='i')))continue;
+        const cost=best[i].cost+1-Math.min(0.7,0.12*Math.log(f+1));
+        if(!best[j]||cost<best[j].cost)best[j]={cost,prev:i};
+      }
+    }
+    if(!best[n])return str;
+    const out=[];for(let k=n;k>0;k=best[k].prev)out.unshift(s.slice(best[k].prev,k));
+    return out.join(' ');
+  }
+  function analyze(rawPages,opts){
+    opts=opts||{};
+    const warnings=[];
+    const fontItalic=opts.fontItalic||(()=>null);
+    const pages=rawPages.map(pg=>({n:pg.n,w:pg.w,h:pg.h,lines:groupLines(pg,fontItalic)}));
+    const H=pages[0]?pages[0].h:648;
+    const sizes=[];
+    pages.forEach(pg=>pg.lines.forEach(l=>{if(/[a-z]/.test(l.text)&&!l.tracked&&l.text.length>20)sizes.push(Math.round(l.h*2)/2);}));
+    const bodyH=mode(sizes)||10.5;
+    const vocab=new Map();
+    pages.forEach(pg=>pg.lines.forEach(l=>{if(!l.tracked)(l.text.toLowerCase().match(/[a-z']+/g)||[]).forEach(w=>vocab.set(w,(vocab.get(w)||0)+1));}));
+    const topCount=new Map();
+    pages.forEach(pg=>{const seen=new Set();pg.lines.forEach(l=>{if(l.y>H*0.92)seen.add(letters(l.text));});seen.forEach(k=>topCount.set(k,(topCount.get(k)||0)+1));});
+    const labelOffsets=[];
+    pages.forEach(pg=>{
+      pg.kept=[];pg.label=null;
+      pg.lines.forEach(l=>{
+        if(l.y>H*0.92&&(topCount.get(letters(l.text))||0)>=3)return;
+        if(l.y<H*0.085&&/^(\d{1,4}|[ivxlc]{1,6})$/i.test(l.text)){pg.label=l.text;return;}
+        pg.kept.push(l);
+      });
+      if(pg.label&&/^\d+$/.test(pg.label))labelOffsets.push(pg.n-parseInt(pg.label,10));
+    });
+    const offset=mode(labelOffsets);
+    const par={0:[],1:[]},widths=[];
+    pages.forEach(pg=>pg.kept.forEach(l=>{if(/[a-z]/.test(l.text)&&!l.tracked&&l.text.length>12){par[pg.n%2].push(Math.round(l.x0));widths.push(l.x1-l.x0);}}));
+    widths.sort((a,b)=>a-b);
+    const fullW=widths.length?widths[Math.floor(widths.length*0.97)]:300;
+    const parL={0:mode(par[0]),1:mode(par[1])};
+    pages.forEach(pg=>{
+      const L=parL[pg.n%2]!==null&&parL[pg.n%2]!==undefined?parL[pg.n%2]:(parL[(pg.n+1)%2]||50);
+      pg.L=L;pg.R=L+fullW;
+      pg.kept.forEach(l=>{l.L=pg.L;l.centered=Math.abs((l.x0+l.x1)/2-(pg.L+pg.R)/2)<=5;});
+    });
+    const gaps=[];
+    pages.forEach(pg=>{for(let i=1;i<pg.kept.length;i++){const g=pg.kept[i-1].y-pg.kept[i].y;if(g>=11&&g<=22)gaps.push(Math.round(g*2)/2);}});
+    const pitch=mode(gaps)||bodyH*1.6;
+    const isToc=pages.map(pg=>{const n=pg.kept.length;return n>=4&&pg.kept.filter(l=>/\.{5,}/.test(l.text)).length/n>=0.35;});
+    const entries=[];
+    pages.forEach((pg,pi)=>{
+      if(!isToc[pi])return;
+      pg.kept.forEach(l=>{
+        if(!/\.{4,}/.test(l.text))return;
+        const m=l.text.match(/^(.*?)\s*\.{4,}\s*([0-9]+|[ivxlc]+)?\s*$/i);
+        if(!m)return;
+        let title=m[1].trim();
+        const label=m[2]&&/^\d+$/.test(m[2])?parseInt(m[2],10):null;
+        if(!title)return;
+        const e={title,label,kind:'section',num:null,partLabel:null};
+        let mm;
+        if((mm=title.match(/^Part\s+([IVXLC\d]+)\s*[\u00B7\u2022:\-\u2013\u2014]?\s*(.*)$/i))){e.kind='part';e.partLabel='Part '+mm[1].toUpperCase();e.title=mm[2]||('Part '+mm[1]);}
+        else if((mm=title.match(/^(\d{1,3})\s+(.+)$/))){e.kind='chapter';e.num=parseInt(mm[1],10);e.title=mm[2];}
+        entries.push(e);
+      });
+    });
+    const norm=s=>letters(s);
+    function pageHasHeading(pg,e){const want=norm(e.title);if(!want)return false;const head=pg.kept.slice(0,7).map(l=>letters(l.text)).join('');return head.indexOf(want)!==-1;}
+    let lastPage=0;
+    entries.forEach(e=>{
+      let guess=(e.label!==null&&offset!==null&&offset!==undefined)?e.label+offset:null;
+      let found=null;const from=Math.max(lastPage,1);
+      if(guess){for(const d of [0,1,-1,2,-2]){const p=pages[guess+d-1];if(p&&p.n>=from&&!isToc[p.n-1]&&pageHasHeading(p,e)){found=p.n;break;}}}
+      if(!found){for(let i=from-1;i<pages.length;i++){if(!isToc[i]&&pageHasHeading(pages[i],e)){found=pages[i].n;break;}}}
+      if(!found&&guess&&pages[guess-1]&&guess>=from)found=guess;
+      e.page=found;if(found)lastPage=found;
+    });
+    const good=entries.filter(e=>e.page);
+    if(entries.length&&good.length<entries.length)warnings.push((entries.length-good.length)+' contents entries could not be matched to a page.');
+    let secDefs=good.slice();
+    if(!secDefs.length){
+      warnings.push('No printed contents page found – sections detected from large/spaced headings.');
+      pages.forEach(pg=>{
+        const first=pg.kept[0];
+        if(first&&(first.h>=bodyH*1.2||(first.tracked&&first.upper))&&first.text.length<80){
+          secDefs.push({title:titleCase(first.tracked&&first.text.indexOf(' ')<0?segmentUpper(first.text,vocab):first.text),kind:'section',page:pg.n});
+        }
+      });
+    }
+    const firstPage=secDefs.length?Math.min.apply(null,secDefs.map(e=>e.page)):1;
+    const sections=[];const frontPages=[];
+    for(let i=0;i<firstPage-1;i++){if(!isToc[i]&&i>0)frontPages.push(i);}
+    if(frontPages.length&&opts.keepFront!==false)sections.push({kind:'front',title:'Copyright',pageIdx:frontPages,nav:false,def:null});
+    secDefs.sort((a,b)=>a.page-b.page);
+    secDefs.forEach((e,i)=>{
+      const end=i+1<secDefs.length?secDefs[i+1].page-1:pages.length;
+      const idx=[];
+      for(let p=e.page;p<=Math.max(e.page,end);p++)if(!isToc[p-1])idx.push(p-1);
+      sections.push({kind:e.kind,title:e.title,partLabel:e.partLabel,num:e.num,pageIdx:idx,nav:true,def:e});
+    });
+    sections.forEach(sec=>{
+      let lines=[];sec.subtitle='';
+      sec.pageIdx.forEach((pi,k)=>{
+        let pl=pages[pi].kept.slice();
+        pl.forEach(l=>{l._page=pi;});
+        if(k===0&&sec.def){
+          let cut=0;
+          while(cut<pl.length&&!(/[a-z]/.test(pl[cut].text)&&!pl[cut].tracked&&pl[cut].h<bodyH*1.9))cut++;
+          const headLines=pl.slice(0,cut);const tl=letters(sec.title);
+          headLines.forEach(l=>{
+            const lt=letters(l.text);
+            if(!lt||/^\d+$/.test(l.text.trim())||lt==='CHAPTER'||/^PART[IVXLC\d]*$/.test(lt)||lt===tl)return;
+            if(tl&&(tl.indexOf(lt)!==-1||lt.indexOf(tl)!==-1))return;
+            let t=l.text;if(l.tracked&&t.indexOf(' ')<0)t=segmentUpper(t,vocab);
+            sec.subtitle=(sec.subtitle?sec.subtitle+' ':'')+(l.upper?titleCase(t):t);
+          });
+          pl=pl.slice(cut);
+        }
+        lines=lines.concat(pl);
+      });
+      sec.blocks=buildBlocks(lines,{bodyH,pitch,vocab,pages,hard:sec.kind==='front'});
+    });
+    const stats={pages:pages.length,bodyH,pitch,offset,entries:entries.length,matched:good.length,warnings};
+    return {sections,stats};
+  }
+  function buildBlocks(lines,ctx){
+    const {bodyH,pitch,vocab,hard}=ctx;
+    const LISTSTART=/^([\u2013\u2014\u2022\u00B7-]|\d{1,2}[.)])\s+/;
+    const blocks=[];let cur=null,prev=null;
+    const quoteLike=l=>l.italic===true||(l.italic===null&&Math.abs(l.h-bodyH*1.05)<0.25&&l.x0>0);
+    function flush(){
+      if(!cur)return;
+      let text='';
+      cur.lines.forEach((l,i)=>{
+        if(i===0)text=l.text;
+        else if(/[A-Za-z]-$/.test(text))text+=l.text;
+        else text+=' '+l.text;
+      });
+      text=text.replace(/\s+/g,' ').trim();
+      const first=cur.lines[0];
+      const allCentered=cur.lines.every(l=>l.centered)&&(hard||cur.lines.some(l=>l.x0>l.L+8));
+      const b={text,centered:allCentered,italic:cur.lines.every(l=>quoteLike(l)),h:first.h,lines:cur.lines.length};
+      if(cur.lines.length===1&&first.tracked&&first.upper){let t=first.text;if(t.indexOf(' ')<0)t=segmentUpper(t,vocab);b.type='label';b.text=titleCase(t);}
+      else if(cur.lines.length===1&&first.h>=bodyH*1.07&&!TERMINAL.test(text)&&text.length<=90&&!allCentered&&!b.italic){b.type='h3';if(b.text===b.text.toUpperCase())b.text=titleCase(b.text);}
+      else if(/^[\u2013\u2014\u2022\u00B7-]\s+/.test(text)){b.type='li';b.text=text.replace(/^[\u2013\u2014\u2022\u00B7-]\s+/,'');}
+      else b.type='p';
+      if(b.type!=='p')b.italic=false;
+      blocks.push(b);cur=null;
+    }
+    lines.forEach(l=>{
+      let brk=false;
+      if(!cur)brk=true;
+      else{
+        const sameP=prev._page===l._page;
+        if(hard&&!/[A-Za-z]-$/.test(prev.text))brk=true;
+        else if(LISTSTART.test(l.text))brk=true;
+        else if(cur.list&&sameP&&(prev.y-l.y)<=pitch*1.15&&!(l.tracked&&l.upper))brk=false;
+        else if(!sameP){const open=!TERMINAL.test(prev.text);brk=!(open&&/^[a-z]/.test(l.text)&&!prev.centered);}
+        else{
+          const gap=prev.y-l.y;
+          if(gap>pitch*1.3)brk=true;
+          else if((l.tracked&&l.upper)||(prev.tracked&&prev.upper))brk=true;
+          else if(Math.abs(l.x0-prev.x0)>7&&!(l.centered&&prev.centered))brk=true;
+          else if(Math.abs(l.h-prev.h)>0.6)brk=true;
+          else if(quoteLike(l)!==quoteLike(prev))brk=true;
+          else if(/:$/.test(prev.text)&&/^[\u201C"\u2018']/.test(l.text))brk=true;
+        }
+      }
+      if(brk){flush();cur={lines:[l],list:LISTSTART.test(l.text)};}else cur.lines.push(l);
+      prev=l;
+    });
+    flush();
+    return blocks;
+  }
+  function wordCount(sec){return sec.blocks.reduce((n,b)=>n+(b.text.match(/\S+/g)||[]).length,0);}
+  root.BookConv={analyze,wordCount,titleCase,letters,cleanXml};
+})(window);
+
+(function (root) {
+  'use strict';
+  const esc=s=>String(s==null?'':s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uFFFE\uFFFF]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const CSS=`body{font-family:serif;line-height:1.5;margin:0;padding:0 2%;}h1,h2,h3{font-weight:bold;line-height:1.25;page-break-after:avoid;break-after:avoid;}h1{font-size:1.6em;text-align:center;margin:2.5em 0 1em;}h2{font-size:1.4em;text-align:center;margin:0.4em 0 1.2em;}h3{font-size:1.1em;text-align:left;margin:1.5em 0 0.5em;}p{margin:0 0 0.9em;text-align:left;}p.center{text-align:center;}p.quote{font-style:italic;margin-left:6%;margin-right:4%;}p.label{font-size:0.8em;letter-spacing:0.1em;text-transform:uppercase;text-align:center;margin:1.6em 0 0.7em;font-weight:bold;}p.eyebrow{font-size:0.85em;letter-spacing:0.15em;text-transform:uppercase;text-align:center;margin:2.5em 0 0.3em;}p.subtitle{text-align:center;font-style:italic;margin:0 0 1.4em;}p.front{text-align:center;margin:0 0 0.5em;font-size:0.9em;}ul{margin:0 0 0.9em 1.2em;padding:0;}li{margin:0 0 0.35em;}.tp-title{font-size:2.1em;font-weight:bold;text-align:center;margin:22% 0 0.4em;}.tp-sub{font-size:1.1em;font-style:italic;text-align:center;margin:0 0 2.5em;}.tp-author{font-size:1.15em;text-align:center;margin:0;}ol.toc{list-style:none;margin:0;padding:0;}ol.toc li{margin:0.4em 0;}a{color:inherit;text-decoration:none;}`;
+  function xhtml(title,body,lang){return `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${esc(lang)}" lang="${esc(lang)}">\n<head><meta charset="UTF-8"/><title>${esc(title)}</title><link rel="stylesheet" type="text/css" href="style.css"/></head>\n<body>\n${body}\n</body>\n</html>`;}
+  function blocksToHtml(blocks){
+    const out=[];let ul=false;
+    blocks.forEach(b=>{
+      const clean=(b.text||'').trim();if(!clean)return;
+      if(b.type!=='li'&&ul){out.push('</ul>');ul=false;}
+      if(b.type==='li'){if(!ul){out.push('<ul>');ul=true;}out.push(`<li>${esc(clean)}</li>`);}
+      else if(b.type==='h3'){out.push(`<h3>${esc(clean)}</h3>`);}
+      else if(b.type==='label'){out.push(`<p class="label">${esc(clean)}</p>`);}
+      else{const cls=b.centered?'center':(b.italic?'quote':'');out.push(cls?`<p class="${cls}">${esc(clean)}</p>`:`<p>${esc(clean)}</p>`);}
+    });
+    if(ul)out.push('</ul>');return out.join('\n');
+  }
+  async function build(JSZip,o){
+    const lang=(o.language||'en').trim()||'en',title=(o.title||'Untitled').trim(),author=(o.author||'Author').trim();
+    const id='urn:uuid:'+(crypto.randomUUID?crypto.randomUUID():(Date.now().toString(16)+'-0000-4000-8000-000000000000'));
+    const modified=new Date().toISOString().replace(/\.\d{3}Z$/,'Z');
+    const zip=new JSZip();
+    const put=(n,d,op)=>zip.file(n,d,Object.assign({createFolders:false},op||{}));
+    put('mimetype','application/epub+zip',{compression:'STORE'});
+    put('META-INF/container.xml',`<?xml version="1.0" encoding="UTF-8"?>\n<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n<rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles>\n</container>`);
+    put('OEBPS/style.css',CSS);
+    const manifest=['<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>','<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>','<item id="css" href="style.css" media-type="text/css"/>'];
+    const spine=[];
+    if(o.coverJpeg){put('OEBPS/images/cover.jpg',o.coverJpeg,{compression:'STORE'});manifest.push('<item id="cover-image" href="images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>');}
+    const tp=`<p class="tp-title">${esc(title)}</p>`+(o.subtitle&&o.subtitle.trim()?`<p class="tp-sub">${esc(o.subtitle.trim())}</p>`:'')+`<p class="tp-author">${esc(author)}</p>`;
+    put('OEBPS/titlepage.xhtml',xhtml(title,tp,lang));
+    manifest.push('<item id="titlepage" href="titlepage.xhtml" media-type="application/xhtml+xml"/>');
+    spine.push('<itemref idref="titlepage"/>');
+    const secs=o.sections.filter(s=>s.blocks&&(s.blocks.length||s.nav));
+    let n=0;
+    secs.forEach(s=>{
+      n++;s.file='sec_'+String(n).padStart(3,'0')+'.xhtml';s.id='sec_'+String(n).padStart(3,'0');
+      let head='';
+      if(s.kind==='part')head=`<p class="eyebrow">${esc(s.partLabel||'Part')}</p><h1>${esc(s.title)}</h1>`;
+      else if(s.kind==='chapter')head=`<p class="eyebrow">Chapter ${esc(s.num)}</p><h2>${esc(s.title)}</h2>`;
+      else if(s.kind==='front')head='';
+      else head=`<h1>${esc(s.title)}</h1>`;
+      if(s.subtitle)head+=`<p class="subtitle">${esc(s.subtitle)}</p>`;
+      const body=s.kind==='front'?'<div>'+s.blocks.filter(b=>(b.text||'').trim()).map(b=>`<p class="front">${esc(b.text.trim())}</p>`).join('\n')+'</div>':head+'\n'+blocksToHtml(s.blocks);
+      put('OEBPS/'+s.file,xhtml(s.title,body,lang));
+      manifest.push(`<item id="${s.id}" href="${s.file}" media-type="application/xhtml+xml"/>`);
+      spine.push(`<itemref idref="${s.id}"/>`);
+    });
+    const navSecs=secs.filter(s=>s.nav);
+    const flatNav=navSecs.map(s=>({label:s.kind==='chapter'?`${s.num}. ${s.title}`:(s.kind==='part'?`${s.partLabel} – ${s.title}`:s.title),href:s.file}));
+    const tocItems=flatNav.map(nd=>`<li><a href="${esc(nd.href)}">${esc(nd.label)}</a></li>`).join('\n');
+    put('OEBPS/contents.xhtml',xhtml('Contents',`<h1>Contents</h1>\n<ol class="toc">\n${tocItems}\n</ol>`,lang));
+    manifest.push('<item id="contents" href="contents.xhtml" media-type="application/xhtml+xml"/>');
+    spine.splice(1,0,'<itemref idref="contents"/>');
+    put('OEBPS/nav.xhtml',`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${esc(lang)}" lang="${esc(lang)}">\n<head><meta charset="UTF-8"/><title>${esc(title)}</title></head>\n<body><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${tocItems}</ol></nav></body>\n</html>`);
+    const ncxPoints=flatNav.map((nd,idx)=>`<navPoint id="np${idx+1}" playOrder="${idx+1}"><navLabel><text>${esc(nd.label)}</text></navLabel><content src="${esc(nd.href)}"/></navPoint>`).join('\n');
+    put('OEBPS/toc.ncx',`<?xml version="1.0" encoding="UTF-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">\n<head><meta name="dtb:uid" content="${esc(id)}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head>\n<docTitle><text>${esc(title)}</text></docTitle>\n<navMap>${ncxPoints}</navMap>\n</ncx>`);
+    put('OEBPS/content.opf',`<?xml version="1.0" encoding="UTF-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id" xml:lang="${esc(lang)}">\n<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n<dc:identifier id="pub-id">${esc(id)}</dc:identifier>\n<dc:title>${esc(title)}</dc:title>\n<dc:creator>${esc(author)}</dc:creator>\n<dc:language>${esc(lang)}</dc:language>\n${o.publisher&&o.publisher.trim()?`<dc:publisher>${esc(o.publisher.trim())}</dc:publisher>`:''}\n<meta property="dcterms:modified">${modified}</meta>\n${o.coverJpeg?'<meta name="cover" content="cover-image"/>':''}\n</metadata>\n<manifest>${manifest.join('\n')}</manifest>\n<spine toc="ncx">${spine.join('\n')}</spine>\n</package>`);
+    const bytes=await zip.generateAsync({type:'uint8array',mimeType:'application/epub+zip',compression:'DEFLATE',compressionOptions:{level:6}});
+    return {bytes,sections:secs.length,navCount:flatNav.length};
+  }
+  async function validate(JSZip,bytes){
+    try{
+      const zip=await JSZip.loadAsync(bytes);const names=Object.keys(zip.files);const issues=[];
+      if(names[0]!=='mimetype')issues.push('mimetype is not the first file');
+      const mt=await zip.file('mimetype').async('string');
+      if(mt!=='application/epub+zip')issues.push('mimetype content wrong');
+      let docs=0;const parser=new DOMParser();
+      for(const n of names){
+        if(!/\.(xhtml|opf|ncx|xml)$/.test(n))continue;
+        const txt=await zip.file(n).async('string');
+        const d=parser.parseFromString(txt,'application/xml');
+        if(d.getElementsByTagName('parsererror').length)issues.push('XML error in '+n);
+        docs++;
+      }
+      const opf=await zip.file('OEBPS/content.opf').async('string');
+      const hrefs=(opf.match(/href="([^"]+)"/g)||[]).map(h=>h.slice(6,-1));
+      hrefs.forEach(h=>{if(!zip.file('OEBPS/'+h))issues.push('missing file '+h);});
+      return {ok:issues.length===0,issues,docs,files:names.length};
+    }catch(e){return {ok:false,issues:[e.message],docs:0,files:0};}
+  }
+  root.EpubBuild={build,validate,esc};
+})(window);
+
+/* ===================== CORE STATE & LIBRARIES ===================== */
+const $ = id => document.getElementById(id);
+const S = {
+  pdfBytes: null, pdfName: 'Manuscript', pages: 0, sizes: [], fonts: null, audit: null, pdfjsDoc: null,
+  front: null, frontName: 'cover', back: null, frontCanvas: null, autoBg: null, palette: [],
+  ebookCover: null, prevPbTrim: null, sections: null
+};
+
+const LIBS = {
+  pdfjsLib: ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'],
+  PDFLib: ['https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js'],
+  JSZip: ['https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js']
+};
+
+function loadOne(name, urls) {
+  return new Promise(resolve => {
+    let i = 0;
+    const next = () => {
+      if (window[name]) return resolve(true);
+      if (i >= urls.length) return resolve(false);
+      const s = document.createElement('script'); s.src = urls[i++];
+      s.onload = () => { let t = 0; const w = () => { if (window[name]) resolve(true); else if (t++ < 40) setTimeout(w, 100); else next(); }; w(); };
+      s.onerror = next; document.head.appendChild(s);
+    };
+    next();
+  });
+}
+
+const PDF_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+async function configurePdfWorker() {
+  if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER;
+}
+function loadWorkerScript() {
+  return new Promise(res => {
+    if (window.pdfjsWorker) return res(true);
+    const urls = [PDF_WORKER, 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'];
+    let i = 0;
+    const next = () => {
+      if (i >= urls.length) return res(false);
+      const s = document.createElement('script'); s.src = urls[i++];
+      s.onload = () => res(!!window.pdfjsWorker); s.onerror = next; document.head.appendChild(s);
+    };
+    next();
+  });
+}
+async function openPdf(bytes, extra) {
+  await configurePdfWorker();
+  const mkOpts = o => Object.assign({ data: bytes.slice() }, extra || {}, o || {});
+  try { return await pdfjsLib.getDocument(mkOpts()).promise; }
+  catch (e) {
+    await loadWorkerScript();
+    return await pdfjsLib.getDocument(mkOpts({ disableWorker: true })).promise;
+  }
+}
+async function loadLibs() {
+  const r = await Promise.all(Object.keys(LIBS).map(k => loadOne(k, LIBS[k])));
+  const ok = r.every(Boolean);
+  if (window.pdfjsLib) await configurePdfWorker();
+  $('libStatus').textContent = ok
+    ? 'Libraries ready. Load your manuscript (PDF/DOCX/HTML/TXT/Images) and cover art above.'
+    : 'Some libraries failed to load – check your internet connection and reload.';
+  return ok;
+}
+
+const fmtBytes = b => !b ? '0 KB' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
+const inch = pt => (pt / 72);
+const safeName = n => String(n || 'file').replace(/[^a-zA-Z0-9._-]+/g, '_').replace(/^_+|_+$/g, '') || 'file';
+function setStatus(id, msg) { $(id).textContent = msg; }
+function prog(id, pct) { const p = $(id); p.style.display = pct >= 100 || pct <= 0 ? 'none' : 'block'; p.firstElementChild.style.width = pct + '%'; }
+const tick = () => new Promise(r => setTimeout(r, 0));
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; };
+const toBlob = (cv, type, q) => new Promise(r => cv.toBlob(r, type, q));
+
+function chk(kind, text, sub) {
+  const ic = { ok: '✓', bad: '✗', warn: '!', info: 'i' }[kind];
+  return `<div class="chk ${kind}"><span class="ic">${ic}</span><div>${text}${sub ? `<small>${sub}</small>` : ''}</div></div>`;
+}
+
+function blobToDataUrl(b) { return new Promise(r => { const f = new FileReader(); f.onload = () => r(String(f.result)); f.onerror = () => r(''); f.readAsDataURL(b); }); }
+async function addResult(boxId, blob, name, autoSave) {
+  name = safeName(name);
+  const box = $(boxId);
+  const restricted = /^(content|file|about):$/.test(location.protocol);
+  const objectUrl = (!restricted && blob.size < 60e6) ? URL.createObjectURL(blob) : '';
+  const href = restricted && blob.size < 40e6 ? await blobToDataUrl(blob) : (objectUrl || '');
+  const row = document.createElement('div');
+  row.className = 'res';
+  row.innerHTML = `<span><b>${name}</b> · ${fmtBytes(blob.size)}</span>`;
+  const a = document.createElement('a');
+  if (href) a.href = href;
+  a.download = name; a.textContent = 'Save';
+  a.addEventListener('click', () => { if (objectUrl) setTimeout(() => { try { URL.revokeObjectURL(objectUrl); } catch (e) {} }, 15000); });
+  row.appendChild(a);
+  if (navigator.share && navigator.canShare) {
+    const sb = document.createElement('button'); sb.textContent = 'Share / Open';
+    sb.onclick = async () => { try { await navigator.share({ files: [new File([blob], name, { type: blob.type })], title: name }); } catch (e) {} };
+    row.appendChild(sb);
+  }
+  box.prepend(row);
+  if (autoSave !== false && href) { try { a.click(); } catch (e) {} }
+}
+
+/* ===================== NAVIGATION ===================== */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.t));
+  if (t.dataset.t === 'cov') scheduleCover();
+  if (t.dataset.t === 'epub' && window.Xerox) Xerox.onTabOpen();
+}));
+document.querySelectorAll('.sub-tab').forEach(t => t.addEventListener('click', () => {
+  const parent = t.closest('.panel');
+  parent.querySelectorAll('.sub-tab').forEach(x => x.classList.toggle('on', x === t));
+  parent.querySelectorAll('.sub-panel').forEach(p => p.classList.toggle('on', p.id === 'sp-' + t.dataset.sub));
+}));
+
+/* ===================== MULTI-FORMAT MANUSCRIPT INGESTION ===================== */
+function trimOf(v) { const [w, h] = v.split('x').map(Number); return { w, h }; }
+function gutterReq(pages) { return pages <= 150 ? 0.375 : pages <= 300 ? 0.5 : pages <= 500 ? 0.625 : pages <= 700 ? 0.75 : 0.875; }
+
+function checkFonts(doc) {
+  try {
+    const { PDFName, PDFDict } = PDFLib;
+    let total = 0, notEmb = 0; const names = new Set();
+    for (const [, obj] of doc.context.enumerateIndirectObjects()) {
+      if (!(obj instanceof PDFDict)) continue;
+      if (obj.get(PDFName.of('Type')) !== PDFName.of('Font')) continue;
+      const st = String(obj.get(PDFName.of('Subtype')) || '');
+      if (st === '/Type3' || st === '/Type0') { if (st === '/Type3') total++; continue; }
+      total++;
+      let fd = obj.get(PDFName.of('FontDescriptor'));
+      fd = fd ? doc.context.lookup(fd) : null;
+      const emb = fd instanceof PDFDict && (fd.has(PDFName.of('FontFile')) || fd.has(PDFName.of('FontFile2')) || fd.has(PDFName.of('FontFile3')));
+      if (!emb) { notEmb++; names.add(String(obj.get(PDFName.of('BaseFont')) || '?').replace('/', '')); }
+    }
+    return { total, notEmb, names: [...names] };
+  } catch (e) { return { total: 0, notEmb: 0, names: [] }; }
+}
+
+function autoTrimFromPdf() {
+  if (!S.sizes.length) return;
+  const m = S.sizes[0], w = m.w / 72, h = m.h / 72;
+  const options = [['5x8',5,8],['5.25x8',5.25,8],['5.5x8.5',5.5,8.5],['5.06x7.81',5.06,7.81],['6x9',6,9],['6.14x9.21',6.14,9.21],['7x10',7,10],['8x10',8,10],['8.25x11',8.25,11],['8.5x11',8.5,11]];
+  let best = null, bestD = Infinity;
+  for (const [k, ww, hh] of options) {
+    const d = Math.abs(ww - w) + Math.abs(hh - h);
+    if (d < bestD) { bestD = d; best = [k, ww, hh]; }
+  }
+  if (best && bestD < 0.15) {
+    $('inTrim').value = best[0]; $('inCustom').classList.add('hide');
+    $('cvTrim').value = best[0];
+  } else {
+    $('inTrim').value = 'custom'; $('inCustom').classList.remove('hide');
+    $('inCW').value = w.toFixed(3); $('inCH').value = h.toFixed(3);
+  }
+}
+
+async function ingestPdfBytes(bytes) {
+  S.pdfBytes = bytes;
+  S.audit = null; S.pdfjsDoc = null; S.sections = null;
+  const doc = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+  S.pages = doc.getPageCount();
+  const map = new Map();
+  doc.getPages().forEach(p => { const { width, height } = p.getSize(); const k = width.toFixed(2) + 'x' + height.toFixed(2); map.set(k, (map.get(k) || 0) + 1); });
+  S.sizes = [...map.entries()].map(([k, n]) => { const [w, h] = k.split('x').map(Number); return { w, h, n }; }).sort((a, b) => b.n - a.n);
+  S.fonts = checkFonts(doc);
+  try { autoTrimFromPdf(); } catch (e) {}
+  $('cvPages').value = Math.min(828, Math.max(24, S.pages)); $('kSpine').value = '';
+  const m = S.sizes[0];
+  $('pdfSummary').innerHTML = `<div class="kv">
+    <div><span>Pages</span><b>${S.pages}</b></div>
+    <div><span>Page size</span><b>${inch(m.w).toFixed(3)}" × ${inch(m.h).toFixed(3)}"</b></div>
+    <div><span>Size variants</span><b>${S.sizes.length}</b></div>
+    <div><span>Fonts</span><b>${S.fonts.notEmb ? S.fonts.notEmb + ' not embedded' : 'all embedded'}</b></div>
+  </div>`;
+  ['inAudit', 'inGo', 'epAnalyze'].forEach(id => { if ($(id)) $(id).disabled = false; });
+  scheduleCover();
+  if (window.Xerox) Xerox.onManuscript();
+}
+
+async function loadPdf(file) {
+  S.pdfName = file.name.replace(/\.pdf$/i, '');
+  $('pdfLabel').textContent = 'Loaded: ' + file.name;
+  $('pdfSub').textContent = fmtBytes(file.size);
+  setStatus('pdfSummary', 'Reading PDF…');
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  await ingestPdfBytes(bytes);
+}
+
+async function imagesToPdf(files) {
+  const doc = await PDFLib.PDFDocument.create();
+  for (const f of files) {
+    const img = await loadImage(f), canvas = flatten(img);
+    const jpg = await toBlob(canvas, 'image/jpeg', 0.95);
+    const im = await doc.embedJpg(await jpg.arrayBuffer());
+    const w = img.naturalWidth / 300, h = img.naturalHeight / 300;
+    const page = doc.addPage([w * 72, h * 72]);
+    page.drawImage(im, { x: 0, y: 0, width: page.getWidth(), height: page.getHeight() });
+  }
+  return new Uint8Array(await doc.save());
+}
+
+async function txtToPdf(text) {
+  const doc = await PDFLib.PDFDocument.create();
+  const font = await doc.embedFont(PDFLib.StandardFonts.TimesRoman);
+  const W = 6 * 72, H = 9 * 72, margin = 54, fs = 11, lh = 14;
+  const lines = [];
+  text.split(/\r?\n/).forEach(para => {
+    if (!para.trim()) { lines.push(''); return; }
+    let cur = '';
+    para.split(/\s+/).forEach(w => {
+      const t = cur ? cur + ' ' + w : w;
+      if (font.widthOfTextAtSize(t, fs) > W - margin * 2 && cur) { lines.push(cur); cur = w; }
+      else cur = t;
+    });
+    if (cur) lines.push(cur);
+  });
+  let page = doc.addPage([W, H]), y = H - margin;
+  for (const line of lines) {
+    if (y < margin) { page = doc.addPage([W, H]); y = H - margin; }
+    if (line) page.drawText(line, { x: margin, y: y - fs, size: fs, font });
+    y -= lh;
+  }
+  return new Uint8Array(await doc.save());
+}
+
+async function htmlToPdf(html, o) {
+  o = o || {};
+  await loadOne('html2canvas', ['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js']);
+  await loadOne('jspdf', ['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js']);
+  const JsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+  if (!window.html2canvas || !JsPDF) throw new Error('HTML-to-PDF libraries failed to load.');
+  const pwIn = o.pageW || 6, phIn = o.pageH || 9, pwPx = pwIn * 96, phPx = phIn * 96;
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = `position:fixed;left:-99999px;top:0;width:${pwPx}px;height:${phPx}px;border:0;`;
+  document.body.appendChild(iframe);
+  iframe.contentDocument.open(); iframe.contentDocument.write(html); iframe.contentDocument.close();
+  await new Promise(r => setTimeout(r, 400));
+  const canvas = await window.html2canvas(iframe.contentDocument.body, { scale: 2, useCORS: true, backgroundColor: '#fff' });
+  document.body.removeChild(iframe);
+  const doc = new JsPDF({ unit: 'in', format: [pwIn, phIn], orientation: 'portrait' });
+  const pageHpx = canvas.width * phIn / pwIn, total = Math.ceil(canvas.height / pageHpx);
+  for (let i = 0; i < total; i++) {
+    if (i > 0) doc.addPage([pwIn, phIn]);
+    const h = Math.min(pageHpx, canvas.height - i * pageHpx);
+    const slice = mk(canvas.width, h);
+    slice.getContext('2d').drawImage(canvas, 0, i * pageHpx, canvas.width, h, 0, 0, canvas.width, h);
+    doc.addImage(slice.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pwIn, phIn);
+  }
+  return new Uint8Array(doc.output('arraybuffer'));
+}
+
+async function docxToPdf(file) {
+  await loadOne('mammoth', ['https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js']);
+  if (!window.mammoth) throw new Error('DOCX library failed to load (check internet).');
+  const ab = await file.arrayBuffer();
+  const result = await window.mammoth.convertToHtml({ arrayBuffer: ab });
+  return htmlToPdf(`<html><body style="font-family:Georgia,serif;font-size:12pt;line-height:1.5;padding:1in;margin:0;">${result.value}</body></html>`, { pageW: 6, pageH: 9 });
+}
+
+async function routeFile(file, allFiles) {
+  if (!window.PDFLib) { setStatus('pdfSummary', 'PDF library not loaded – check connection and reload.'); return; }
+  const name = file.name.toLowerCase(), ext = name.split('.').pop();
+  try {
+    if (ext === 'pdf' || file.type === 'application/pdf') { await loadPdf(file); return; }
+    setStatus('pdfSummary', 'Converting ' + file.name + ' to PDF…');
+    let pdfBytes;
+    if (file.type.startsWith('image/') || /^(png|jpe?g|webp|gif|bmp)$/.test(ext)) {
+      const imgs = (allFiles && allFiles.length) ? [...allFiles].filter(f => f.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/i.test(f.name)) : [file];
+      pdfBytes = await imagesToPdf(imgs);
+    } else if (ext === 'txt') pdfBytes = await txtToPdf(await file.text());
+    else if (ext === 'docx') pdfBytes = await docxToPdf(file);
+    else if (ext === 'html' || ext === 'htm') pdfBytes = await htmlToPdf(await file.text());
+    else throw new Error('Unsupported format .' + ext);
+    S.pdfName = file.name.replace(/\.[^.]+$/, '');
+    $('pdfLabel').textContent = 'Loaded: ' + file.name;
+    $('pdfSub').textContent = fmtBytes(file.size);
+    await ingestPdfBytes(pdfBytes);
+  } catch (e) { console.error(e); setStatus('pdfSummary', 'Could not load: ' + e.message); }
+}
+
+$('pdfIn').addEventListener('change', e => {
+  const fs = [...e.target.files]; if (!fs[0]) return;
+  setStatus('pdfSummary', 'Opening ' + fs[0].name + '…');
+  routeFile(fs[0], fs);
+  e.target.value = '';
+});
+
+/* ===================== INTERIOR PDF ===================== */
+$('inTrim').addEventListener('change', () => $('inCustom').classList.toggle('hide', $('inTrim').value !== 'custom'));
+$('inBleed').addEventListener('change', () => $('inBleedBox').classList.toggle('hide', $('inBleed').value !== 'c'));
+$('inGutterMode').addEventListener('change', () => { $('inShiftManual').disabled = $('inGutterMode').value !== 'manual'; });
+
+function interiorBleed() { const v = $('inBleed').value; return v === 'c' ? Math.max(0, Math.min(1, +$('inBleedIn').value || 0)) : (v === '1' ? 0.125 : 0); }
+function interiorTrim() {
+  if ($('inTrim').value === 'custom') return { w: Math.max(1, Math.min(20, +$('inCW').value || 6)), h: Math.max(1, Math.min(20, +$('inCH').value || 9)) };
+  return trimOf($('inTrim').value);
+}
+
+async function ensurePdfjs() {
+  if (!S.pdfjsDoc) S.pdfjsDoc = await openPdf(S.pdfBytes, { useSystemFonts: true });
+  return S.pdfjsDoc;
+}
+
+async function auditMargins(progId) {
+  const pdf = await ensurePdfjs();
+  const r = { inside: 99, outside: 99, top: 99, bottom: 99, wIn: 0, wOut: 0, wTop: 0, wBot: 0, n: 0 };
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page = await pdf.getPage(n), vp = page.getViewport({ scale: 1 }), tc = await page.getTextContent();
+    let x0 = 1e9, x1 = -1e9, yMin = 1e9, yMax = -1e9, any = false;
+    tc.items.forEach(it => {
+      if (!it.str || !it.str.trim()) return;
+      any = true;
+      const x = it.transform[4], y = it.transform[5];
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x + it.width);
+      yMin = Math.min(yMin, y); yMax = Math.max(yMax, y + (it.height || 0));
+    });
+    if (any) {
+      const odd = n % 2 === 1;
+      const inside = (odd ? x0 : vp.width - x1) / 72, outside = (odd ? vp.width - x1 : x0) / 72;
+      const top = (vp.height - yMax) / 72, bottom = yMin / 72;
+      if (inside < r.inside) { r.inside = inside; r.wIn = n; }
+      if (outside < r.outside) { r.outside = outside; r.wOut = n; }
+      if (top < r.top) { r.top = top; r.wTop = n; }
+      if (bottom < r.bottom) { r.bottom = bottom; r.wBot = n; }
+    }
+    if (progId && n % 10 === 0) { prog(progId, Math.round(n / pdf.numPages * 100)); await tick(); }
+  }
+  r.n = pdf.numPages; S.audit = r;
+  return r;
+}
+
+function auditHtml(a, bleed) {
+  const need = gutterReq(a.n), edge = bleed ? 0.375 : 0.25;
+  const row = (name, v, req, pg) => chk(v >= req - 0.001 ? 'ok' : 'bad', `${name}: ${v.toFixed(2)}" (needs ≥ ${req.toFixed(3)}")`, `tightest on page ${pg}`);
+  return row('Inside (gutter) margin', a.inside, need, a.wIn) + row('Outside margin', a.outside, edge, a.wOut) + row('Top margin', a.top, edge, a.wTop) + row('Bottom margin', a.bottom, edge, a.wBot);
+}
+
+$('inAudit').addEventListener('click', async () => {
+  try {
+    setStatus('inStatus', 'Measuring text margins on every page…');
+    const a = await auditMargins('inProg'); prog('inProg', 0);
+    setStatus('inStatus', 'Margins measured (text only – images are not measured).');
+    $('inOut').innerHTML = auditHtml(a, $('inBleed').value === '1');
+  } catch (e) { prog('inProg', 0); setStatus('inStatus', 'Margin check failed: ' + e.message); }
+});
+
+$('inGo').addEventListener('click', async () => {
+  if (!await PlayStore.ensureUnlockedForExport('Exact-size Interior PDF Export')) return;
+  const btn = $('inGo'); btn.disabled = true;
+  try {
+    const trim = interiorTrim(), bAmt = interiorBleed(), bleed = bAmt > 0;
+    const pw = (trim.w + bAmt) * 72, ph = (trim.h + 2 * bAmt) * 72;
+    const skipCheck = $('inMarginSkip').value === '1';
+    let a = S.audit;
+    if (!a && !skipCheck) {
+      setStatus('inStatus', 'Measuring margins…');
+      try { a = await auditMargins('inProg'); } catch (err) { a = null; }
+    }
+    let shift = 0, note = '';
+    const gutterMode = $('inGutterMode').value;
+    if (gutterMode === 'manual') {
+      shift = Math.max(0, +$('inShiftManual').value || 0);
+      note = `Applied manual page shift: ${shift.toFixed(3)}".`;
+    } else if (gutterMode === 'auto' && a) {
+      const need = gutterReq(S.pages);
+      if (a.inside < need) {
+        shift = need - a.inside;
+        if (a.outside - shift < 0.25 + bAmt) {
+          note = 'Gutter is too small but shifting pages would break the outside margin – re-flow in Word with a wider inside margin.';
+          shift = 0;
+        } else note = `Shifted pages ${shift.toFixed(3)}" away from the spine to reach the ${need}" gutter.`;
+      }
+    }
+    setStatus('inStatus', 'Building exact-size pages…'); prog('inProg', 5);
+    const src = await PDFLib.PDFDocument.load(S.pdfBytes, { ignoreEncryption: true });
+    const out = await PDFLib.PDFDocument.create();
+    const total = src.getPageCount();
+    const emb = await out.embedPdf(src, Array.from({ length: total }, (_, i) => i));
+    for (let i = 0; i < total; i++) {
+      const e = emb[i], pg = out.addPage([pw, ph]);
+      const near = Math.abs(e.width - trim.w * 72) / (trim.w * 72) < 0.02 && Math.abs(e.height - trim.h * 72) / (trim.h * 72) < 0.02;
+      const sc = near ? 1 : Math.min((trim.w * 72) / e.width, (trim.h * 72) / e.height);
+      const dw = e.width * sc, dh = e.height * sc;
+      const odd = (i + 1) % 2 === 1;
+      const x = (pw - dw) / 2 + (odd ? shift * 72 : -shift * 72);
+      const y = (ph - dh) / 2;
+      pg.drawPage(e, { x, y, width: dw, height: dh });
+      pg.setCropBox(0, 0, pw, ph); pg.setTrimBox(bAmt * 72, bAmt * 72, trim.w * 72, trim.h * 72);
+      if (i % 20 === 0) { prog('inProg', 5 + Math.round(i / total * 85)); await tick(); }
+    }
+    out.setTitle($('bkTitle').value || S.pdfName); out.setAuthor($('bkAuthor').value || '');
+    out.setProducer('AHK Book Maker'); out.setCreator('AHK Book Maker');
+    const bytes = await out.save();
+    const chkDoc = await PDFLib.PDFDocument.load(bytes);
+    let bad = 0; chkDoc.getPages().forEach(p => { const s = p.getSize(); if (Math.abs(s.width - pw) > 0.05 || Math.abs(s.height - ph) > 0.05) bad++; });
+    const fonts = checkFonts(chkDoc);
+    prog('inProg', 100);
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const name = `${safeName(S.pdfName)}_${trim.w}x${trim.h}${bleed ? '_bleed' : ''}_print.pdf`;
+    setStatus('inStatus', '');
+    $('inOut').innerHTML = (a && !skipCheck ? auditHtml(a, bleed) : '')
+      + (note ? chk('info', note) : '')
+      + chk(bad === 0 ? 'ok' : 'bad', `Verified: ${chkDoc.getPageCount()} pages, every page ${(pw / 72).toFixed(3)}" × ${(ph / 72).toFixed(3)}" (${pw.toFixed(2)} × ${ph.toFixed(2)} pt)`)
+      + chk(fonts.notEmb === 0 ? 'ok' : 'bad', fonts.notEmb === 0 ? 'All fonts are embedded' : `${fonts.notEmb} font(s) NOT embedded: ${fonts.names.join(', ')}`)
+      + chk(chkDoc.getPageCount() >= 24 && chkDoc.getPageCount() <= 828 ? 'ok' : 'bad', `Page count ${chkDoc.getPageCount()} (KDP allows 24–828)`);
+    await addResult('inRes', blob, name);
+  } catch (e) { console.error(e); setStatus('inStatus', 'Error: ' + e.message); prog('inProg', 0); }
+  btn.disabled = false;
+});
+
+/* ===================== PRE-FLIGHT ===================== */
+$('pfRun').addEventListener('click', async () => {
+  const t = $('pfTarget').value, L = [], trim = interiorTrim();
+  $('pfOut').innerHTML = chk('info', 'Checking…'); await tick();
+  try {
+    if (t !== 'kdp_eb') {
+      if (!S.pdfBytes) L.push(chk('bad', 'No interior manuscript loaded', 'Load your manuscript at the top.'));
+      else {
+        const m = S.sizes[0], tw = trim.w * 72, th = trim.h * 72;
+        const exact = S.sizes.length === 1 && Math.abs(m.w - tw) < 0.1 && Math.abs(m.h - th) < 0.1;
+        L.push(chk(exact ? 'ok' : 'bad', `Page size ${inch(m.w).toFixed(3)}" × ${inch(m.h).toFixed(3)}" – expected ${trim.w}" × ${trim.h}"`, exact ? '' : 'Fix: Tab 2 · Interior PDF → "Create exact-size print PDF".'));
+        if (S.sizes.length > 1) L.push(chk('bad', `${S.sizes.length} different page sizes inside the PDF`));
+        L.push(chk(S.pages >= 24 && S.pages <= 828 ? 'ok' : 'bad', `${S.pages} pages (KDP allows 24–828)`));
+        L.push(chk(S.fonts.notEmb === 0 ? 'ok' : 'bad', S.fonts.notEmb === 0 ? 'All fonts embedded' : `${S.fonts.notEmb} font(s) not embedded: ${S.fonts.names.join(', ')}`));
+        try { const a = await auditMargins(); L.push(auditHtml(a, false)); } catch (e) { L.push(chk('info', 'Margin check skipped')); }
+      }
+      if (!S.front) L.push(chk('bad', 'No front cover art loaded', 'Load it at the top.'));
+      else {
+        const w = S.front.naturalWidth, h = S.front.naturalHeight;
+        const needW = (trim.w + 0.125) * 300, needH = (trim.h + 0.25) * 300;
+        L.push(chk(Math.max(needW / w, needH / h) <= 1.35 ? 'ok' : 'warn', `Cover art ${w} × ${h} px – a ${trim.w} × ${trim.h} front needs ≈ ${Math.round(needW)} × ${Math.round(needH)} px for 300 dpi`, `Effective ≈ ${Math.round(Math.min(w / (trim.w + 0.125), h / (trim.h + 0.25)))} dpi.`));
+        const ar = w / h, tr = trim.w / trim.h;
+        L.push(chk(Math.abs(ar - tr) / tr < 0.03 ? 'ok' : 'warn', `Art proportions ${ar.toFixed(3)} vs trim ${tr.toFixed(3)}`, Math.abs(ar - tr) / tr < 0.03 ? '' : 'Cover Studio extends sides automatically so nothing is cropped.'));
+      }
+      L.push(chk('info', (t === 'kdp_pb' || t === 'kdp_hc') ? 'KDP cover: leave the 2" × 1.2" barcode box clear of text (Cover Studio guards this automatically).' : 'Pothi cover: use Pothi\'s expected finished size + 0.2" bleed on every side.'));
+    } else {
+      if (!S.front) L.push(chk('bad', 'No front cover art loaded'));
+      else {
+        const w = S.front.naturalWidth, h = S.front.naturalHeight;
+        L.push(chk(h >= 1000 && w >= 625 ? 'ok' : 'bad', `Art ${w} × ${h} px (min 1000 × 625)`));
+        L.push(chk(h / w >= 1.6 ? 'ok' : 'warn', `Height ÷ width = ${(h / w).toFixed(2)} (needs ≥ 1.6)`));
+      }
+      if (!S.pdfBytes) L.push(chk('bad', 'No manuscript loaded'));
+      else L.push(chk('info', 'Build either a Same-to-Same Xerox EPUB or Reflowable EPUB 3 in Tab 4 · eBook Studio.'));
+    }
+    $('pfOut').innerHTML = L.join('');
+  } catch (e) { $('pfOut').innerHTML = chk('bad', 'Pre-flight error: ' + e.message); }
+});
+
+/* ===================== COVER STUDIO ===================== */
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Could not read this image')); };
+    img.src = url;
+  });
+}
+function flatten(img) {
+  const c = mk(img.naturalWidth, img.naturalHeight), x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0);
+  return c;
+}
+function cloneFix(c) {
+  const W = c.width, H = c.height;
+  const x = Math.round(+$('clX').value / 100 * W), y = Math.round(+$('clY').value / 100 * H);
+  const w = Math.max(4, Math.round(+$('clW').value / 100 * W)), h = Math.max(4, Math.round(+$('clH').value / 100 * H));
+  const dx = Math.round(+$('clD').value / 100 * W);
+  const patch = mk(w, h), pc = patch.getContext('2d');
+  pc.drawImage(c, x + dx, y, w, h, 0, 0, w, h);
+  const f = Math.max(2, Math.round(Math.min(w, h) * 0.12));
+  const m1 = mk(w, h), a = m1.getContext('2d'); a.fillStyle = '#fff'; a.fillRect(f, f, w - 2 * f, h - 2 * f);
+  const m2 = mk(w, h), b = m2.getContext('2d');
+  try { b.filter = `blur(${Math.max(1, f / 2)}px)`; } catch (e) {}
+  b.drawImage(m1, 0, 0);
+  pc.globalCompositeOperation = 'destination-in'; pc.drawImage(m2, 0, 0);
+  c.getContext('2d').drawImage(patch, x, y);
+}
+function rebuildFront() {
+  if (!S.front) { S.frontCanvas = null; return; }
+  const c = flatten(S.front);
+  if ($('cvClean').checked) { try { cloneFix(c); } catch (e) {} }
+  S.frontCanvas = c;
+  updateAutoBg();
+}
+$('frontIn').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    S.front = await loadImage(f); S.frontName = f.name;
+    $('frontLabel').textContent = 'Loaded: ' + f.name;
+    $('frontSub').textContent = `${S.front.naturalWidth} × ${S.front.naturalHeight} px`;
+    rebuildFront(); ['cvExport', 'cvExportFront'].forEach(id => $(id).disabled = false); scheduleCover();
+  } catch (err) { $('frontSub').textContent = err.message; }
+});
+$('backIn').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const img = await loadImage(f); S.back = flatten(img); $('backLabel').textContent = 'Loaded: ' + f.name; scheduleCover(); } catch (err) {}
+});
+
+/* Auto Background Colour & Swatches */
+const toHex = (r, g, b) => '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+function analyseCoverColours(cv) {
+  const w = 64, h = Math.max(16, Math.round(64 * cv.height / cv.width));
+  const t = mk(w, h), x = t.getContext('2d'); x.drawImage(cv, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data;
+  const ring = Math.max(2, Math.round(Math.min(w, h) * 0.08));
+  const all = new Map(), edge = new Map();
+  const add = (m, r, g, b) => { const k = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4); let e = m.get(k); if (!e) { e = { n: 0, r: 0, g: 0, b: 0 }; m.set(k, e); } e.n++; e.r += r; e.g += g; e.b += b; };
+  for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+    const i = (y * w + xx) * 4, r = d[i], g = d[i + 1], b = d[i + 2];
+    add(all, r, g, b);
+    if (xx < ring || xx >= w - ring || y < ring || y >= h - ring) add(edge, r, g, b);
+  }
+  const top = m => [...m.values()].sort((a, b) => b.n - a.n);
+  const avg = e => [e.r / e.n, e.g / e.n, e.b / e.n];
+  const auto = toHex(...avg(top(edge)[0]));
+  const pal = [];
+  for (const e of top(all)) {
+    const c = avg(e);
+    if (pal.every(p => Math.hypot(p[0] - c[0], p[1] - c[1], p[2] - c[2]) > 70)) pal.push(c);
+    if (pal.length >= 6) break;
+  }
+  return { auto, palette: pal.map(c => toHex(...c)) };
+}
+function bgHex() { return ($('cvBgMode').value === 'auto' && S.autoBg) ? S.autoBg : $('cvTint').value; }
+function renderSwatches() {
+  const box = $('cvSwatches'); box.innerHTML = '';
+  const cur = bgHex().toLowerCase();
+  (S.palette || []).forEach(col => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'sw' + (col.toLowerCase() === cur ? ' on' : '');
+    b.style.background = col; b.title = col;
+    b.addEventListener('click', () => { $('cvTint').value = col; $('cvBgMode').value = 'manual'; renderSwatches(); scheduleCover(); });
+    box.appendChild(b);
+  });
+  $('cvAutoTag').textContent = S.autoBg ? `Auto colour: ${S.autoBg.toUpperCase()}${$('cvBgMode').value === 'auto' ? ' (active)' : ' – manual ' + $('cvTint').value.toUpperCase()}` : 'Auto colour appears after loading front cover.';
+}
+function updateAutoBg() {
+  if (!S.frontCanvas) { S.autoBg = null; S.palette = []; renderSwatches(); return; }
+  try { const r = analyseCoverColours(S.frontCanvas); S.autoBg = r.auto; S.palette = r.palette; } catch (e) { S.autoBg = null; }
+  if ($('cvBgMode').value === 'auto' && S.autoBg) $('cvTint').value = S.autoBg;
+  renderSwatches();
+}
+$('cvBgMode').addEventListener('change', () => { if ($('cvBgMode').value === 'auto' && S.autoBg) $('cvTint').value = S.autoBg; renderSwatches(); scheduleCover(); });
+$('cvTint').addEventListener('input', () => { $('cvBgMode').value = 'manual'; renderSwatches(); scheduleCover(); });
+
+/* Pothi & KDP Error Parsers + OCR */
+function pothiFill() {
+  const m = $('pPaste').value.match(/expected[^(]*\(\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+))?/i);
+  if (!m) { $('cvInfo').textContent = 'Could not find "expected: (width, height, spine)" in pasted text.'; return; }
+  $('pW').value = m[1]; $('pH').value = m[2]; if (m[3]) $('pS').value = m[3];
+  scheduleCover();
+}
+$('pFill').addEventListener('click', pothiFill);
+$('pPaste').addEventListener('input', () => { if (/expected/i.test($('pPaste').value)) pothiFill(); });
+$('pSpineAuto').addEventListener('click', () => {
+  if ($('pBind').value === 'hard') { $('cvInfo').textContent = 'For hardcover, use the spine number Pothi shows.'; return; }
+  const pages = Math.max(1, +$('cvPages').value || 1), oldSp = +$('pS').value || 0, newSp = +(pages * 0.001968).toFixed(3);
+  $('pW').value = +((+$('pW').value) - oldSp + newSp).toFixed(3); $('pS').value = newSp;
+  scheduleCover();
+});
+
+function isWrapTarget(t) { return t === 'kdp_pb' || t === 'kdp_hc' || t === 'pothi' || t === 'custom'; }
+function isSingleSide(t) { return t === 'front_only' || t === 'back_only'; }
+function kOverride(auto) { const v = $('kSpine').value; return v !== '' && +v > 0 ? +v : auto; }
+
+function kdpFill() {
+  const m = $('kPaste').value.match(/expected[^\d]*([\d.]+)\s*[x×]\s*([\d.]+)/i);
+  if (!m) { $('kInfo').textContent = 'Could not find "expected cover size is W x H" in pasted text.'; return; }
+  const W = +m[1], H = +m[2], t = $('cvTarget').value, trim = cvTrimOf();
+  const fixed = t === 'kdp_hc' ? 1.575 : 0.25;
+  const sp = +(W - 2 * trim.w - fixed).toFixed(3);
+  const base = t === 'kdp_hc' ? 0.189 : 0;
+  const pages = Math.max(24, Math.min(828, +$('cvPages').value || 200));
+  const hOk = Math.abs(H - (t === 'kdp_hc' ? trim.h + 1.417 : trim.h + 0.25)) < 0.01;
+  const hint = hOk ? 'Height matches trim size.' : 'Height does NOT match – check trim size & Paperback/Hardcover.';
+  $('kW').value = W; $('kH').value = H;
+  const match = [0.0025, 0.002252].find(th => Math.abs(pages * th + base - sp) < 0.002);
+  if (match) {
+    $('cvPaper').value = String(match); $('kSpine').value = '';
+    $('kInfo').textContent = `KDP wants ${W} × ${H} (${pages} pages on ${match === 0.0025 ? 'CREAM' : 'WHITE'} paper). ` + hint;
+  } else {
+    $('kSpine').value = sp;
+    $('kInfo').textContent = `KDP wants ${W} × ${H}. Spine solved to ${sp.toFixed(3)}". ` + hint;
+  }
+  scheduleCover();
+}
+$('kFill').addEventListener('click', kdpFill);
+['kW', 'kH'].forEach(id => $(id).addEventListener('input', scheduleCover));
+$('kClear').addEventListener('click', () => { $('kW').value = ''; $('kH').value = ''; $('kSpine').value = ''; scheduleCover(); });
+
+function loadTesseract() {
+  return new Promise((res, rej) => {
+    if (window.Tesseract) return res();
+    const urls = ['https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js', 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'];
+    let i = 0; const next = () => { if (i >= urls.length) return rej(new Error('Could not load OCR reader.')); const sc = document.createElement('script'); sc.src = urls[i++]; sc.onload = () => res(); sc.onerror = next; document.head.appendChild(sc); }; next();
+  });
+}
+$('kImg').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const out = $('kInfo'); out.textContent = 'Reading screenshot via OCR…';
+  try {
+    await loadTesseract();
+    const r = await Tesseract.recognize(f, 'eng');
+    const raw = (r.data.text || '').replace(/(\d),(\d)/g, '$1.$2').replace(/\s+/g, ' ');
+    const n = '(\\d{1,2}\\.\\d{1,3})';
+    const exp = raw.match(new RegExp('expected[^\\d]{0,40}' + n + '\\s*[x×X*]\\s*' + n, 'i'));
+    const pot = raw.match(/expected[^(]*\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+    if ($('cvTarget').value === 'pothi' && pot) { $('pPaste').value = pot[0] + ')'; pothiFill(); out.textContent = `Read from screenshot: expected (${pot[1]}, ${pot[2]}, ${pot[3]}).`; }
+    else if (exp) { $('kPaste').value = `expected cover size is ${exp[1]}x${exp[2]}`; kdpFill(); out.textContent = 'Read from screenshot: ' + exp[1] + ' × ' + exp[2] + ' in.'; }
+    else if (!applyKdpErrors(raw)) out.textContent = 'Could not detect expected size in screenshot. Type width/height manually.';
+  } catch (err) { out.textContent = 'Screenshot reading failed: ' + err.message; }
+  e.target.value = '';
+});
+$('kPaste').addEventListener('input', () => { if (/expected/i.test($('kPaste').value)) kdpFill(); });
+$('kSpine').addEventListener('input', scheduleCover);
+
+function cvTrimOf() { const v = $('cvTrim').value; if (v === 'custom') return { w: Math.max(1, Math.min(20, +$('cvCW').value || 6)), h: Math.max(1, Math.min(20, +$('cvCH').value || 9)) }; return trimOf(v); }
+function paperThk() { return $('cvPaper').value === 'custom' ? (+$('cvThk').value || 0.002252) : +$('cvPaper').value; }
+function sideBleed() { const v = $('cvSideBleed').value; return v === 'custom' ? Math.max(0, Math.min(1, +$('cvSBin').value || 0)) : (v === '1' ? 0.125 : 0); }
+
+function syncCustomBoxes() {
+  const t = $('cvTarget').value, kd = t === 'kdp_pb' || t === 'kdp_hc';
+  $('cvCustomTrim').classList.toggle('hide', !($('cvTrim').value === 'custom' && t !== 'pothi' && t !== 'ebook' && t !== 'custom'));
+  $('cvCustomThk').classList.toggle('hide', !(kd && $('cvPaper').value === 'custom'));
+  $('cvCustomSB').classList.toggle('hide', !(isSingleSide(t) && $('cvSideBleed').value === 'custom'));
+  $('customWrapBox').classList.toggle('hide', t !== 'custom');
+  const okHc = ['5.5x8.5', '6x9', '6.14x9.21', '7x10', '8.25x11'];
+  $('cvHcWarn').classList.toggle('hide', !(t === 'kdp_hc' && !okHc.includes($('cvTrim').value)));
+}
+['cvTarget', 'cvTrim', 'cvPaper', 'cvSideBleed'].forEach(id => $(id).addEventListener('change', syncCustomBoxes));
+
+function geomBase() {
+  const t = $('cvTarget').value, trim = cvTrimOf();
+  const pages = Math.max(24, Math.min(828, +$('cvPages').value || 200)), thk = paperThk();
+  if (t === 'kdp_pb') { const b = 0.125, sp = kOverride(pages * thk); return { t, trimW: trim.w, trimH: trim.h, bx: b, by: b, spine: sp, W: 2 * trim.w + sp + 2 * b, H: trim.h + 2 * b, pages }; }
+  if (t === 'kdp_hc') { const sp = kOverride(Math.min(550, Math.max(75, pages)) * thk + 0.189); return { t, trimW: trim.w, trimH: trim.h, bx: 0.7874, by: 0.7087, spine: sp, W: 2 * trim.w + sp + 1.5748, H: trim.h + 1.4173, pages }; }
+  if (t === 'pothi') { const Wf = +$('pW').value || 12.25, Hf = +$('pH').value || 9, b = +$('pB').value || 0; const sp = Math.max(0, $('pS').value === '' ? Wf - 2 * trim.w : +$('pS').value); const tw = Math.max(1, (Wf - sp) / 2); return { t, trimW: tw, trimH: Hf, bx: b, by: b, spine: sp, W: Wf + 2 * b, H: Hf + 2 * b, pages }; }
+  if (t === 'custom') { const Wf = +$('cuW').value || 12.5, Hf = +$('cuH').value || 9, b = +$('cuB').value || 0, tw = +$('cuTW').value || 6, th2 = +$('cuTH').value || 9, sp = +$('cuS').value || 0.5; return { t, trimW: tw, trimH: th2, bx: b, by: b, spine: sp, W: Wf + 2 * b, H: Hf + 2 * b, pages }; }
+  if (isSingleSide(t)) { const b = sideBleed(); return { t, trimW: trim.w, trimH: trim.h, bx: b, by: b, spine: 0, W: trim.w + 2 * b, H: trim.h + 2 * b, pages }; }
+  return null;
+}
+function geom() {
+  const g = geomBase();
+  if (!g || !isWrapTarget(g.t)) return g;
+  const mw = +$('kW').value, mh = +$('kH').value;
+  if (mw > 0) { g.spine = Math.max(0, g.spine + (mw - g.W)); g.W = mw; }
+  if (mh > 0) { g.by += (mh - g.H) / 2; g.H = mh; }
+  return g;
+}
+const safeDpi = (W, H) => (W * 300 * H * 300 <= 16e6) ? 300 : Math.max(150, Math.floor(Math.sqrt(16e6 / (W * H))));
+
+function autoAdjustPaperbackToHardcover() {
+  if ($('cvTarget').value === 'kdp_pb') S.prevPbTrim = $('cvTrim').value;
+  if ($('inTrim').value !== 'custom') $('cvTrim').value = $('inTrim').value;
+  else { const it = interiorTrim(); $('cvTrim').value = 'custom'; $('cvCW').value = it.w; $('cvCH').value = it.h; }
+  syncCustomBoxes();
+  $('cvTarget').value = 'kdp_hc';
+  $('cvArtInsideRed').checked = true; $('cvSafeWithinLines').checked = true;
+  $('cvBarcode').checked = true; $('cvBcNoCutText').checked = true;
+  $('cvNx').value = '0'; $('cvNy').value = '0';
+  syncCoverUi(); refreshCover();
+  const g = geom();
+  setStatus('cvStatus', `Auto-adjusted Paperback → Hardcover (${g.W.toFixed(3)}" × ${g.H.toFixed(3)}" wrap, spine ${g.spine.toFixed(3)}") with art & text inside safe lines.`);
+}
+function switchBackToPaperback() {
+  if (S.prevPbTrim) $('cvTrim').value = S.prevPbTrim;
+  $('cvTarget').value = 'kdp_pb';
+  syncCoverUi(); refreshCover();
+  setStatus('cvStatus', 'Switched back to KDP Paperback wrap.');
+}
+$('cvAutoPbToHc').addEventListener('click', autoAdjustPaperbackToHardcover);
+$('cvAutoHcToPb').addEventListener('click', switchBackToPaperback);
+
+function syncCoverUi() {
+  const t = $('cvTarget').value, wrap = isWrapTarget(t), single = isSingleSide(t);
+  document.querySelectorAll('#p-cov .print').forEach(e => e.classList.toggle('hide', !wrap || t === 'custom'));
+  document.querySelectorAll('#p-cov .single-side').forEach(e => e.classList.toggle('hide', !single));
+  document.querySelectorAll('#p-cov .wrapT').forEach(e => e.classList.toggle('hide', !wrap));
+  document.querySelectorAll('#p-cov .kdp').forEach(e => e.classList.toggle('hide', t !== 'kdp_pb' && t !== 'kdp_hc'));
+  document.querySelectorAll('#p-cov .pothi-only').forEach(e => e.classList.toggle('hide', t !== 'pothi'));
+  $('p-cov').querySelector('.front-card').classList.toggle('hide', t === 'back_only');
+  $('p-cov').querySelector('.print-card').classList.toggle('hide', t === 'ebook' || t === 'front_only');
+  document.querySelectorAll('#p-cov .spine-field').forEach(e => e.classList.toggle('hide', !wrap));
+  document.querySelectorAll('#p-cov .back-bg-field').forEach(e => e.classList.toggle('hide', !wrap));
+  $('cvAutoPbToHc').classList.toggle('hide', t === 'kdp_hc' || t === 'custom');
+  $('cvAutoHcToPb').classList.toggle('hide', t !== 'kdp_hc');
+  $('cvExportFront').classList.toggle('hide', t === 'ebook' || t === 'back_only');
+  $('cvFormat').parentElement.classList.toggle('hide', t === 'ebook');
+  const hasReadyArt = !!(S.frontCanvas || (t === 'back_only' && (S.back || $('cvBlurb').value.trim() || $('cvBackHead').value.trim())));
+  $('cvExport').disabled = !hasReadyArt;
+}
+
+function resizeStep(src, dw, dh) {
+  let cur = src;
+  while (true) {
+    const nw = cur.width * 2 < dw ? cur.width * 2 : (cur.width > dw * 2 ? Math.ceil(cur.width / 2) : dw);
+    const nh = cur.height * 2 < dh ? cur.height * 2 : (cur.height > dh * 2 ? Math.ceil(cur.height / 2) : dh);
+    const c = mk(nw, nh), x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    x.drawImage(cur, 0, 0, nw, nh); cur = c;
+    if (nw === dw && nh === dh) return cur;
+  }
+}
+function sharpen(cv, amount) {
+  const w = cv.width, h = cv.height, ctx = cv.getContext('2d');
+  const src = ctx.getImageData(0, 0, w, h), dst = ctx.createImageData(w, h), s = src.data, d = dst.data;
+  const ce = 1 + 4 * amount, sd = -amount; d.set(s);
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = (y * w + x) * 4;
+    for (let k = 0; k < 3; k++) {
+      const v = s[i + k] * ce + (s[i - 4 + k] + s[i + 4 + k] + s[i - w * 4 + k] + s[i + w * 4 + k]) * sd;
+      d[i + k] = v < 0 ? 0 : v > 255 ? 255 : v;
+    }
+  }
+  ctx.putImageData(dst, 0, 0);
+}
+function makeArt(src, bw, bh, mode, o) {
+  o = o || {};
+  const out = mk(bw, bh), c = out.getContext('2d');
+  const sw = src.width, sh = src.height;
+  const scale = mode === 'fill' ? Math.max(bw / sw, bh / sh) : Math.min(bw / sw, bh / sh);
+  const dw = Math.max(1, Math.round(sw * scale)), dh = Math.max(1, Math.round(sh * scale));
+  let img = resizeStep(src, dw, dh);
+  if (o.sharp && scale > 1.15) sharpen(img, 0.3);
+  const cx = o.cx != null ? o.cx : bw / 2;
+  let dx = Math.round(cx - dw / 2 + (o.ox || 0)), dy;
+  if (mode === 'fill') {
+    dx = Math.min(0, Math.max(bw - dw, dx));
+    dy = Math.round(-(dh - bh) * (o.ay != null ? o.ay : 0.5) + (o.oy || 0));
+    dy = Math.min(0, Math.max(bh - dh, dy));
+  } else dy = Math.round(bh / 2 - dh / 2 + (o.oy || 0));
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(img, dx, dy);
+  if (mode === 'extend') {
+    const stripH = Math.max(2, Math.min(dh, Math.round(dh * 0.04)));
+    const mirrorH = (clip, tx, ty, sx, sy, sySrc, shSrc) => { c.save(); c.beginPath(); c.rect(clip[0], clip[1], clip[2], clip[3]); c.clip(); c.translate(tx, ty); c.scale(sx, sy); c.drawImage(img, 0, sySrc, dw, shSrc, dx, 0, dw, clip[3]); c.restore(); };
+    const mirrorV = (clip, tx, ty, sx, sy, sxSrc, swSrc) => { c.save(); c.beginPath(); c.rect(clip[0], clip[1], clip[2], clip[3]); c.clip(); c.translate(tx, ty); c.scale(sx, sy); c.drawImage(img, sxSrc, 0, swSrc, dh, 0, dy, clip[2], dh); c.restore(); };
+    if (dx > 0) mirrorV([0, 0, dx, bh], dx, 0, -1, 1, 0, Math.min(dw, Math.max(2, Math.round(dw * 0.04))));
+    if (dx + dw < bw) mirrorV([dx + dw, 0, bw - dx - dw, bh], dx + dw, 0, -1, 1, Math.max(0, dw - Math.max(2, Math.round(dw * 0.04))), Math.min(dw, Math.max(2, Math.round(dw * 0.04))));
+    if (dy > 0) mirrorH([0, 0, bw, dy], 0, dy, 1, -1, 0, stripH);
+    if (dy + dh < bh) mirrorH([0, dy + dh, bw, bh - dy - dh], 0, dy + dh, 1, -1, Math.max(0, dh - stripH), stripH);
+  }
+  return out;
+}
+function blurFill(c, art, x, y, w, h) {
+  if (w < 2 || h < 2) return;
+  const sw = Math.max(8, Math.round(w / 14)), sh = Math.max(8, Math.round(h / 14));
+  const s = mk(sw, sh), sc = s.getContext('2d');
+  const sy = Math.round(art.height * 0.48), shh = Math.max(1, art.height - sy - Math.round(art.height * 0.14));
+  const k = Math.max(sw / art.width, sh / shh);
+  sc.imageSmoothingQuality = 'high';
+  sc.drawImage(art, 0, sy, art.width, shh, (sw - art.width * k) / 2, (sh - shh * k) / 2, art.width * k, shh * k);
+  try { sc.filter = 'blur(1.5px)'; sc.drawImage(s, 0, 0); } catch (e) {}
+  c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+  c.drawImage(s, x, y, w, h);
+}
+const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+function avgLum(cv, x, y, w, h) {
+  const t = mk(1, 1), c = t.getContext('2d'); c.drawImage(cv, Math.max(0, x), Math.max(0, y), Math.max(1, w), Math.max(1, h), 0, 0, 1, 1);
+  const d = c.getImageData(0, 0, 1, 1).data; return (0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255;
+}
+function wrapText(c, text, maxW) {
+  const words = text.split(/\s+/), lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (c.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
+  if (cur) lines.push(cur); return lines;
+}
+
+function softClear(c, bc, tint, f) {
+  // solid core (stays >= KDP's 2" x 1.2") + feathered left/top edge so the clear area blends into the art
+  c.fillStyle = tint; c.fillRect(bc.x + f, bc.y + f, bc.w - f, bc.h - f);
+  const rgb = tint.replace('#',''), t0 = `rgba(${parseInt(rgb.substr(0,2),16)},${parseInt(rgb.substr(2,2),16)},${parseInt(rgb.substr(4,2),16)},0)`;
+  let g = c.createLinearGradient(0, bc.y, 0, bc.y + f); g.addColorStop(0, t0); g.addColorStop(1, tint);
+  c.fillStyle = g; c.fillRect(bc.x + f, bc.y, bc.w - f, f);
+  g = c.createLinearGradient(bc.x, 0, bc.x + f, 0); g.addColorStop(0, t0); g.addColorStop(1, tint);
+  c.fillStyle = g; c.fillRect(bc.x, bc.y + f, f, bc.h - f);
+  g = c.createRadialGradient(bc.x + f, bc.y + f, 0, bc.x + f, bc.y + f, f); g.addColorStop(0, tint); g.addColorStop(1, t0);
+  c.fillStyle = g; c.fillRect(bc.x, bc.y, f, f);
+}
+function softClear(c, bc, tint, f) {
+  c.fillStyle = tint; c.fillRect(bc.x + f, bc.y + f, bc.w - f, bc.h - f);
+  const rgb = tint.replace('#',''), t0 = `rgba(${parseInt(rgb.substr(0,2),16)},${parseInt(rgb.substr(2,2),16)},${parseInt(rgb.substr(4,2),16)},0)`;
+  let g = c.createLinearGradient(0, bc.y, 0, bc.y + f); g.addColorStop(0, t0); g.addColorStop(1, tint);
+  c.fillStyle = g; c.fillRect(bc.x + f, bc.y, bc.w - f, f);
+  g = c.createLinearGradient(bc.x, 0, bc.x + f, 0); g.addColorStop(0, t0); g.addColorStop(1, tint);
+  c.fillStyle = g; c.fillRect(bc.x, bc.y + f, f, bc.h - f);
+  g = c.createRadialGradient(bc.x + f, bc.y + f, 0, bc.x + f, bc.y + f, f); g.addColorStop(0, tint); g.addColorStop(1, t0);
+  c.fillStyle = g; c.fillRect(bc.x, bc.y, f, f);
+}
+
+function marginDefaults(t) { return t === 'kdp_hc' ? { out: 0.716, spine: 0.4 } : (t === 'pothi' ? { out: 0.3, spine: 0.2 } : { out: 0.375, spine: 0.125 }); }
+function getMargins() { const d = marginDefaults($('cvTarget').value); return { out: +$('mgOut').value || d.out, spine: +$('mgSpine').value || d.spine }; }
+function applyKdpErrors(raw) {
+  raw = String(raw || '').replace(/(\d),(\d)/g, '$1.$2').replace(/\s+/g, ' ');
+  const msgs = []; let found = false;
+  const lv = [...raw.matchAll(/(?:at least|least)\s*(\d(?:\.\d+)?)\s*in/gi)].map(m => +m[1]);
+  if (lv.length) {
+    $('mgOut').value = lv[0]; msgs.push(`outside margin ${lv[0]}"`); found = true;
+    if (/spine/i.test(raw) && lv[1]) { $('mgSpine').value = lv[1]; msgs.push(`spine margin ${lv[1]}"`); }
+    $('cvSafeWithinLines').checked = true; $('cvArtInsideRed').checked = true;
+  }
+  const bcm = raw.match(/(\d(?:\.\d+)?)\s*inch(?:es)?\s*wide\s*by\s*(\d(?:\.\d+)?)\s*inch/i);
+  if (bcm) {
+    $('bcW').value = +(Math.max(2, +bcm[1]) + 0.3).toFixed(2); $('bcH').value = +(Math.max(1.2, +bcm[2]) + 0.2).toFixed(2);
+    $('cvBarcode').checked = true; $('cvBcSoft').checked = true; $('cvBcDraw').checked = false;
+    msgs.push(`barcode space ${bcm[1]}" × ${bcm[2]}" kept plain`); found = true;
+  }
+  const exp = raw.match(/expected[^\d]{0,40}(\d{1,2}\.\d{1,3})\s*[x×X*]\s*(\d{1,2}\.\d{1,3})/i);
+  if (exp) { $('kPaste').value = `expected cover size is ${exp[1]}x${exp[2]}`; kdpFill(); msgs.push(`size ${exp[1]} × ${exp[2]}`); found = true; }
+  $('kErrInfo').textContent = found ? 'Adjusted: ' + msgs.join(', ') + '. Re-export the cover.' : 'Could not find a margin, barcode or size rule in that text. Type the margins manually.';
+  if (found) scheduleCover();
+  return found;
+}
+$('kErrApply').addEventListener('click', () => applyKdpErrors($('kErrText').value));
+$('kErrImg').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  $('kErrInfo').textContent = 'Reading screenshot via OCR…';
+  try { await loadTesseract(); const r = await Tesseract.recognize(f, 'eng'); $('kErrText').value = r.data.text || ''; applyKdpErrors(r.data.text); }
+  catch (err) { $('kErrInfo').textContent = 'Screenshot reading failed: ' + err.message; }
+  e.target.value = '';
+});
+['mgOut', 'mgSpine'].forEach(id => $(id).addEventListener('input', scheduleCover));
+$('cvBcSoft').addEventListener('change', scheduleCover);
+function drawBackTextSafe(c, ctx) {
+  const { head, blurb, font, pick, lumBack, bc, noCutText, px, g, W, H, notes } = ctx;
+  if (!head && !blurb) return;
+  const safePad = $('cvSafeWithinLines').checked ? px(0.45) : px(0.2);
+  const M = getMargins(), bx = Math.max(px(g.bx) + px(0.55), px(M.out) + px(0.1)), bw = Math.max(px(1.5), px(g.bx + g.trimW) - Math.max(px(0.55), px(M.spine) + px(0.1)) - bx);
+  const top = Math.max(px(g.by) + px(0.55) + safePad, px(M.out) + px(0.1));
+  const barcodeTop = bc ? bc.y : (H - px(g.by));
+  const bottom = noCutText ? (barcodeTop - px(0.28)) : (H - px(g.by) - px(0.5));
+  const availH = bottom - top;
+  if (availH <= px(0.3)) { notes.push('Barcode box leaves no room for back text – reduce barcode height or shorten blurb.'); return; }
+  const col = pick(lumBack);
+  let fs = px(0.2), laid = null;
+  for (; fs >= px(0.085); fs -= Math.max(1, px(0.004))) {
+    c.font = `${fs}px ${font}`;
+    const bodyLines = [];
+    blurb.split(/\n\s*\n/).forEach(p => { if (p.trim()) bodyLines.push(wrapText(c, p.replace(/\s*\n\s*/g, ' '), bw)); });
+    c.font = `bold ${Math.round(fs * 1.25)}px ${font}`;
+    const hl = head ? wrapText(c, head, bw) : [];
+    const lh = fs * 1.36, hlh = fs * 1.25 * 1.22;
+    const total = hl.length * hlh + (hl.length ? fs * 0.75 : 0) + bodyLines.reduce((n, p) => n + p.length * lh + fs * 0.5, 0);
+    if (total <= availH) { laid = { bodyLines, hl, lh, hlh, fs }; break; }
+  }
+  if (!laid) { notes.push('Back text is too tall to fit above barcode – shorten blurb.'); return; }
+  c.save(); c.beginPath(); c.rect(bx, top, bw, availH); c.clip();
+  c.fillStyle = col; c.textBaseline = 'top'; c.textAlign = 'left';
+  let y = top;
+  c.font = `bold ${Math.round(laid.fs * 1.25)}px ${font}`;
+  laid.hl.forEach(l => { c.fillText(l, bx, y); y += laid.hlh; });
+  if (laid.hl.length) y += laid.fs * 0.75;
+  c.font = `${laid.fs}px ${font}`;
+  laid.bodyLines.forEach(p => { p.forEach(l => { c.fillText(l, bx, y); y += laid.lh; }); y += laid.fs * 0.5; });
+  c.restore();
+}
+
+function drawArtInBox(c, src, boxX, boxY, boxW, boxH, fit, ay, sharp, ox, oy, insideRed, trimX, trimY, trimW, trimH, side) {
+  if (!src || boxW < 2 || boxH < 2) return;
+  let iL = 0, iR = 0, iT = 0, iB = 0;
+  if ($('cvSafeWithinLines').checked && insideRed) {
+    const gg = geom(), k = trimW / gg.trimW, M = getMargins();
+    const o = Math.max(0, M.out - gg.bx) * k, ot = Math.max(0, M.out - gg.by) * k, sp = M.spine * k;
+    iT = iB = ot;
+    if (side === 'back') { iL = o; iR = sp; } else if (side === 'front') { iL = sp; iR = o; } else { iL = iR = o; }
+  }
+  const rx = insideRed ? (trimX + iL) : boxX, ry = insideRed ? (trimY + iT) : boxY;
+  const rw = Math.max(2, insideRed ? (trimW - iL - iR) : boxW), rh = Math.max(2, insideRed ? (trimH - iT - iB) : boxH);
+  const mode = fit === 'contain' ? 'fit' : fit;
+  const fa = makeArt(src, rw, rh, mode, { ay, sharp, cx: rw / 2, ox, oy });
+  c.save();
+  if (insideRed) { c.beginPath(); c.rect(rx, ry, rw, rh); c.clip(); }
+  c.drawImage(fa, rx, ry);
+  c.restore();
+}
+
+function renderFrontOnly(dpi, o) {
+  o = o || {};
+  const g = geom(), px = v => Math.round(v * dpi), W = px(g.W), H = px(g.H);
+  const cv = mk(W, H), c = cv.getContext('2d'); c.imageSmoothingQuality = 'high';
+  const art = S.frontCanvas, sharp = $('cvSharp').checked && dpi >= 200;
+  const fit = $('cvFit').value, ay = +$('cvAnchor').value, ox = px(+$('cvNx').value), oy = px(+$('cvNy').value);
+  c.fillStyle = bgHex(); c.fillRect(0, 0, W, H);
+  if (art) drawArtInBox(c, art, 0, 0, W, H, fit, ay, sharp, ox, oy, $('cvArtInsideRed').checked, px(g.bx), px(g.by), px(g.trimW), px(g.trimH));
+  const res = { cv, g, dpi, bc: null, notes: [], px, W, H, spineX: 0, spineW: 0, frontX: 0 };
+  if (o.guides) drawGuides(c, res);
+  return res;
+}
+
+function renderBackOnly(dpi, o) {
+  o = o || {};
+  const g = geom(), px = v => Math.round(v * dpi), W = px(g.W), H = px(g.H);
+  const cv = mk(W, H), c = cv.getContext('2d'); c.imageSmoothingQuality = 'high';
+  const tint = bgHex(), sharp = $('cvSharp').checked && dpi >= 200, fit = $('cvFit').value, ay = +$('cvAnchor').value;
+  const noCutText = $('cvBcNoCutText').checked, insideRed = $('cvArtInsideRed').checked, notes = [];
+  c.fillStyle = tint; c.fillRect(0, 0, W, H);
+  let bc = null;
+  if ($('cvBarcode').checked) {
+    const bw = px(+$('bcW').value), bh = px(+$('bcH').value);
+    bc = { x: W - px(g.bx) - bw, y: H - px(g.by) - bh, w: bw, h: bh + px(g.by) };
+  }
+  if (S.back) {
+    drawArtInBox(c, S.back, 0, 0, W, H, fit, ay, sharp, 0, 0, insideRed, px(g.bx), px(g.by), px(g.trimW), px(g.trimH));
+    if (bc && $('cvBcDraw').checked) { c.fillStyle = tint; c.fillRect(bc.x - px(0.06), bc.y - px(0.06), bc.w + px(0.12), bc.h + px(0.12)); }
+  }
+  if (bc && $('cvBcDraw').checked) { c.fillStyle = $('bcCol').value; c.fillRect(bc.x, bc.y, bc.w, bc.h); }
+  else if (bc && $('cvBcSoft').checked) softClear(c, bc, tint, px(0.25));
+  /* otherwise margin only: nothing painted */
+  const lumBack = avgLum(cv, px(g.bx), px(g.by), px(g.trimW), px(g.trimH));
+  const pick = lum => $('cvTxtCol').value === 'auto' ? (lum > 0.58 ? '#111111' : '#ffffff') : $('cvTxtCol').value;
+  drawBackTextSafe(c, { head: $('cvBackHead').value.trim(), blurb: $('cvBlurb').value.trim(), font: $('cvFont').value, pick, lumBack, bc, noCutText, px, g, W, H, notes });
+  const res = { cv, g, dpi, bc, notes, px, W, H, spineX: 0, spineW: 0, frontX: 0 };
+  if (o.guides) drawGuides(c, res);
+  return res;
+}
+
+function renderPrint(dpi, o) {
+  o = o || {};
+  const g = geom();
+  if (g.t === 'front_only') return renderFrontOnly(dpi, o);
+  if (g.t === 'back_only') return renderBackOnly(dpi, o);
+  const px = v => Math.round(v * dpi), W = px(g.W), H = px(g.H);
+  const cv = mk(W, H), c = cv.getContext('2d'); c.imageSmoothingQuality = 'high';
+  const art = S.frontCanvas, spineX = px(g.bx + g.trimW), spineW = px(g.spine), frontX = spineX + spineW;
+  const tint = bgHex(), ta = +$('cvTintA').value, sharp = $('cvSharp').checked && dpi >= 200;
+  const fit = $('cvFit').value, ay = +$('cvAnchor').value, ox = px(+$('cvNx').value), oy = px(+$('cvNy').value);
+  const noCutText = $('cvBcNoCutText').checked, insideRed = $('cvArtInsideRed').checked, notes = [];
+
+  c.fillStyle = tint; c.fillRect(0, 0, W, H);
+  if ($('cvBg').value === 'blur' && art) { blurFill(c, art, 0, 0, frontX, H); c.fillStyle = rgba(tint, ta); c.fillRect(0, 0, frontX, H); }
+  if (S.back) drawArtInBox(c, S.back, 0, 0, spineX, H, fit, ay, sharp, 0, 0, insideRed, px(g.bx), px(g.by), px(g.trimW), px(g.trimH), 'back');
+  if (art) drawArtInBox(c, art, frontX, 0, W - frontX, H, fit, ay, sharp, ox, oy, insideRed, frontX, px(g.by), px(g.trimW), px(g.trimH), 'front');
+
+  const lumBack = avgLum(cv, px(g.bx), px(g.by), px(g.trimW), px(g.trimH));
+  const lumSpine = avgLum(cv, spineX, 0, Math.max(1, spineW), H);
+  const pick = lum => $('cvTxtCol').value === 'auto' ? (lum > 0.58 ? '#111111' : '#ffffff') : $('cvTxtCol').value;
+  const font = $('cvFont').value;
+
+  let bc = null;
+  if ($('cvBarcode').checked) {
+    const bw = px(+$('bcW').value), bh = px(+$('bcH').value);
+    bc = { x: spineX - bw, y: H - px(g.by) - bh, w: bw, h: bh + px(g.by) };
+    if ($('cvBcDraw').checked) { c.fillStyle = tint; c.fillRect(bc.x - px(0.06), bc.y - px(0.06), bc.w + px(0.12), bc.h + px(0.12)); c.fillStyle = $('bcCol').value; c.fillRect(bc.x, bc.y, bc.w, bc.h); }
+    else if ($('cvBcSoft').checked) softClear(c, bc, tint, px(0.25));
+  }
+  drawBackTextSafe(c, { head: $('cvBackHead').value.trim(), blurb: $('cvBlurb').value.trim(), font, pick, lumBack, bc, noCutText, px, g, W, H, notes });
+
+  let spineMsg = '';
+  if (g.t === 'kdp_pb' && g.pages < 79) spineMsg = 'Spine text skipped (KDP needs 79+ pages for spine text).';
+  else if (spineW < px(0.18)) spineMsg = 'Spine too thin for text.';
+  else {
+    const txt = $('cvSpineTxt').value.trim() || (($('bkTitle').value + '   ·   ' + $('bkAuthor').value).toUpperCase());
+    const safeH = g.t === 'kdp_hc' ? px(g.trimH - 1.2) : px(g.trimH - 0.6);
+    c.save(); c.translate(spineX + spineW / 2, H / 2); c.rotate(Math.PI / 2);
+    c.fillStyle = pick(lumSpine); c.textAlign = 'center'; c.textBaseline = 'middle';
+    let fs = Math.min(spineW * 0.48, px(0.32)); c.font = `bold ${fs}px ${font}`;
+    const w = c.measureText(txt).width; if (w > safeH) { fs = fs * safeH / w; c.font = `bold ${fs}px ${font}`; }
+    c.fillText(txt, 0, 0); c.restore();
+  }
+  if (spineMsg) notes.push(spineMsg);
+
+  const res = { cv, g, dpi, bc, notes, px, W, H, spineX, spineW, frontX };
+  if (o.guides) drawGuides(c, res);
+  return res;
+}
+function drawGuides(c, r) {
+  const { g, px, W, H, spineX, spineW, bc } = r, lw = Math.max(1.5, r.dpi / 60);
+  c.save(); c.lineWidth = lw;
+  const rect = (x, y, w, h, col, dash) => { c.strokeStyle = col; c.setLineDash(dash || []); c.strokeRect(x, y, w, h); };
+  const s = px(g.t === 'kdp_hc' ? 0.5 : 0.25);
+  if (isWrapTarget(g.t)) {
+    rect(px(g.bx), px(g.by), px(g.trimW) * 2 + spineW, px(g.trimH), '#ef4444', [lw * 6, lw * 4]);
+    rect(px(g.bx) + s, px(g.by) + s, Math.max(1, px(g.trimW) - 2 * s), Math.max(1, px(g.trimH) - 2 * s), '#22c55e', [lw * 3, lw * 3]);
+    rect(spineX + spineW + s, px(g.by) + s, Math.max(1, px(g.trimW) - 2 * s), Math.max(1, px(g.trimH) - 2 * s), '#22c55e', [lw * 3, lw * 3]);
+    c.strokeStyle = '#06b6d4'; c.setLineDash([lw * 5, lw * 3]);
+    c.beginPath(); c.moveTo(spineX, 0); c.lineTo(spineX, H); c.moveTo(spineX + spineW, 0); c.lineTo(spineX + spineW, H); c.stroke();
+  } else {
+    const tl = px(g.bx), tt = px(g.by), tw = px(g.trimW), th = px(g.trimH);
+    rect(tl, tt, tw, th, '#ef4444', [lw * 6, lw * 4]);
+    rect(tl + s, tt + s, Math.max(1, tw - 2 * s), Math.max(1, th - 2 * s), '#22c55e', [lw * 3, lw * 3]);
+  }
+  if (bc) { c.setLineDash([]); c.strokeStyle = '#f59e0b'; c.strokeRect(bc.x, bc.y, bc.w, bc.h); c.fillStyle = '#b45309'; c.font = `bold ${Math.round(r.dpi * 0.12)}px sans-serif`; c.textAlign = 'center'; c.fillText('BARCODE (NO TEXT)', bc.x + bc.w / 2, bc.y + bc.h / 2 - r.dpi * 0.1); }
+  c.restore();
+}
+
+function renderEbook() {
+  const art = S.frontCanvas, ar = art.height / art.width;
+  let W, H;
+  if (ar >= 1.6 && ar <= 2.2) { H = 2560; W = Math.round(2560 / ar); } else { W = 1600; H = 2560; }
+  const fit = $('cvFit').value === 'contain' ? 'fit' : $('cvFit').value;
+  const out = makeArt(art, W, H, fit, { ay: +$('cvAnchor').value, sharp: $('cvSharp').checked });
+  const f = mk(W, H), x = f.getContext('2d'); x.fillStyle = bgHex(); x.fillRect(0, 0, W, H); x.drawImage(out, 0, 0);
+  return f;
+}
+async function setJpegDpi(blob, dpi) {
+  const buf = new Uint8Array(await blob.arrayBuffer());
+  if (buf[0] !== 0xff || buf[1] !== 0xd8) return blob;
+  const hi = (dpi >> 8) & 255, lo = dpi & 255;
+  if (buf[2] === 0xff && buf[3] === 0xe0 && buf[6] === 0x4a) { const o = buf.slice(); o[13] = 1; o[14] = hi; o[15] = lo; o[16] = hi; o[17] = lo; return new Blob([o], { type: 'image/jpeg' }); }
+  const app0 = new Uint8Array([0xff, 0xe0, 0, 16, 0x4a, 0x46, 0x49, 0x46, 0, 1, 1, 1, hi, lo, hi, lo, 0, 0]);
+  const o = new Uint8Array(buf.length + app0.length); o.set(buf.slice(0, 2), 0); o.set(app0, 2); o.set(buf.slice(2), 2 + app0.length);
+  return new Blob([o], { type: 'image/jpeg' });
+}
+
+let cvTimer = null;
+function scheduleCover() { clearTimeout(cvTimer); cvTimer = setTimeout(refreshCover, 250); }
+function refreshCover() {
+  syncCoverUi();
+  const t = $('cvTarget').value, pv = $('cvPreview');
+  if (t === 'ebook') {
+    if (!S.frontCanvas) { $('cvSpecs').innerHTML = ''; $('cvInfo').textContent = 'Load your front cover art above.'; return; }
+    const e = renderEbook(), k = Math.min(1, 520 / e.width);
+    pv.width = Math.round(e.width * k); pv.height = Math.round(e.height * k); pv.getContext('2d').drawImage(e, 0, 0, pv.width, pv.height);
+    $('cvSpecs').innerHTML = `<div><span>Output</span><b>${e.width} × ${e.height} px</b></div><div><span>Height ÷ width</span><b>${(e.height / e.width).toFixed(2)}</b></div><div><span>Format</span><b>JPG · RGB</b></div>`;
+    $('cvInfo').textContent = 'Kindle / Pothi eBook cover preview.'; return;
+  }
+  const g = geom();
+  if (isWrapTarget(t)) {
+    $('cvSpecs').innerHTML = `<div><span>Format</span><b>${t === 'kdp_hc' ? 'KDP Hardcover' : (t === 'kdp_pb' ? 'KDP Paperback' : (t === 'pothi' ? 'Pothi Wrap' : 'Custom Wrap'))}</b></div><div><span>Spine</span><b>${g.spine.toFixed(3)}"</b></div><div><span>Full file</span><b>${g.W.toFixed(3)}" × ${g.H.toFixed(3)}"</b></div><div><span>At 300 dpi</span><b>${Math.round(g.W * 300)} × ${Math.round(g.H * 300)} px</b></div>`;
+  } else {
+    $('cvSpecs').innerHTML = `<div><span>Side</span><b>${t === 'front_only' ? 'Front cover only' : 'Back cover only'}</b></div><div><span>File size</span><b>${g.W.toFixed(3)}" × ${g.H.toFixed(3)}"</b></div><div><span>At 300 dpi</span><b>${Math.round(g.W * 300)} × ${Math.round(g.H * 300)} px</b></div><div><span>Trim</span><b>${g.trimW}" × ${g.trimH}"</b></div>`;
+  }
+  if (t !== 'back_only' && !S.frontCanvas) { $('cvInfo').textContent = 'Load your front cover art above to see the preview.'; return; }
+  const dpi = Math.min(100, safeDpi(g.W, g.H));
+  const r = renderPrint(dpi, { guides: $('cvGuides').checked });
+  const k = Math.min(1, 860 / r.cv.width);
+  pv.width = Math.round(r.cv.width * k); pv.height = Math.round(r.cv.height * k); pv.getContext('2d').drawImage(r.cv, 0, 0, pv.width, pv.height);
+  if (S.frontCanvas) {
+    const eff = Math.round(Math.min(S.frontCanvas.width / (g.trimW + g.bx), S.frontCanvas.height / g.H));
+    $('cvInfo').textContent = `Preview (guides not exported). Front art ≈ ${eff} dpi${eff < 280 ? ' – upscaled & sharpened on export.' : '.'} ${r.notes.join(' ')}`;
+  } else $('cvInfo').textContent = `Preview (guides not exported). ${r.notes.join(' ')}`;
+}
+document.querySelectorAll('#p-cov input, #p-cov select, #p-cov textarea').forEach(el => {
+  el.addEventListener('input', () => { if (/^cl[XYWHD]$/.test(el.id) || el.id === 'cvClean') { $('cleanBox').classList.toggle('hide', !$('cvClean').checked); rebuildFront(); } scheduleCover(); });
+  el.addEventListener('change', () => { if (el.id === 'cvClean') { $('cleanBox').classList.toggle('hide', !el.checked); rebuildFront(); } scheduleCover(); });
+});
+
+async function makeEbookJpg() {
+  const e = renderEbook();
+  let blob = await toBlob(e, 'image/jpeg', 0.95); blob = await setJpegDpi(blob, 300);
+  S.ebookCover = new Uint8Array(await blob.arrayBuffer());
+  return { blob, w: e.width, h: e.height };
+}
+function ebookChecks(w, h, size) {
+  return chk(h >= 1000 && w >= 625 ? 'ok' : 'bad', `Size ${w} × ${h} px (min 1000 × 625, ideal 2560 × 1600)`)
+    + chk(h / w >= 1.6 ? 'ok' : 'warn', `Height ÷ width = ${(h / w).toFixed(2)} (needs ≥ 1.6)`)
+    + chk('ok', 'JPG, RGB, no transparency, 300 dpi tag') + chk(size < 50e6 ? 'ok' : 'bad', `File size ${fmtBytes(size)} (limit 50 MB)`);
+}
+
+/* ===== App icon / small image export ===== */
+let icOwn = null;
+$('icFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const im = new Image(); im.onload = () => { icOwn = im; $('icSrcSel').value = 'own'; $('icStatus').textContent = 'Loaded: ' + f.name; }; im.src = URL.createObjectURL(f);
+});
+function icSource() {
+  const v = $('icSrcSel').value;
+  return v === 'own' ? icOwn : (v === 'back' ? S.back : S.front);
+}
+function icCanvas(img, size, fit, bg) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+  x.fillStyle = bg; x.fillRect(0, 0, size, size);
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  if (fit === 'crop') { const s = Math.min(w, h); x.drawImage(img, (w - s) / 2, (h - s) / 2, s, s, 0, 0, size, size); }
+  else { const k = Math.min(size / w, size / h), dw = w * k, dh = h * k; x.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh); }
+  return c;
+}
+const icBlob = (c, type, q) => new Promise(r => c.toBlob(r, type, q));
+$('icGo').addEventListener('click', async () => {
+  const img = icSource();
+  if (!img) { $('icStatus').textContent = 'Load an image first (front cover art at the top, or upload another image here).'; return; }
+  const sizes = [];
+  if ($('ic192').checked) sizes.push(192);
+  if ($('ic512').checked) sizes.push(512);
+  const cu = parseInt($('icCustom').value, 10); if (cu >= 16 && cu <= 4096 && !sizes.includes(cu)) sizes.push(cu);
+  const fmts = ['Png', 'Jpg', 'Pdf'].filter(f => $('ic' + f).checked);
+  if (!sizes.length || !fmts.length) { $('icStatus').textContent = 'Choose at least one size and one format.'; return; }
+  if (!await PlayStore.ensureUnlockedForExport('App icon export')) return;
+  try {
+    $('icStatus').textContent = 'Making files…';
+    const base = safeName(S.pdfName || 'icon').replace(/\.[a-z0-9]+$/i, '');
+    for (const size of sizes) {
+      const c = icCanvas(img, size, $('icFit').value, $('icBg').value);
+      if (fmts.includes('Png')) await addResult('icRes', await icBlob(c, 'image/png'), `${base}_${size}x${size}.png`);
+      if (fmts.includes('Jpg')) await addResult('icRes', await icBlob(c, 'image/jpeg', 0.95), `${base}_${size}x${size}.jpg`);
+      if (fmts.includes('Pdf')) {
+        const doc = await PDFLib.PDFDocument.create(), png = await doc.embedPng(await (await icBlob(c, 'image/png')).arrayBuffer());
+        const pg = doc.addPage([size, size]); pg.drawImage(png, { x: 0, y: 0, width: size, height: size });
+        await addResult('icRes', new Blob([await doc.save()], { type: 'application/pdf' }), `${base}_${size}x${size}.pdf`);
+      }
+    }
+    $('icStatus').textContent = 'Done – tap Save on each file below.';
+  } catch (e) { $('icStatus').textContent = 'Error: ' + e.message; }
+});
+$('cvExportFront').addEventListener('click', async () => {
+  if (!await PlayStore.ensureUnlockedForExport('Kindle eBook Cover Export')) return;
+  try { setStatus('cvStatus', 'Making Kindle eBook cover…'); const r = await makeEbookJpg(); setStatus('cvStatus', ''); $('cvCheck').innerHTML = ebookChecks(r.w, r.h, r.blob.size); await addResult('cvRes', r.blob, `${safeName(S.pdfName)}_kindle_cover_${r.w}x${r.h}.jpg`); }
+  catch (e) { setStatus('cvStatus', 'Error: ' + e.message); }
+});
+$('cvExport').addEventListener('click', async () => {
+  if (!await PlayStore.ensureUnlockedForExport('Cover Studio Export')) return;
+  const btn = $('cvExport'); btn.disabled = true;
+  try {
+    if ($('cvTarget').value === 'ebook') { $('cvExportFront').click(); btn.disabled = false; return; }
+    const g = geom(), dpi = Math.min(safeDpi(g.W, g.H), $('cvDpi').value === 'auto' ? 300 : +$('cvDpi').value);
+    setStatus('cvStatus', 'Rendering cover at ' + dpi + ' dpi…'); prog('cvProg', 15); await tick();
+    const r = renderPrint(dpi, { guides: false });
+    prog('cvProg', 55); await tick();
+    const fmt = $('cvFormat').value, base = `${safeName(S.pdfName)}_${$('cvTarget').value}_cover_${g.W.toFixed(3)}x${g.H.toFixed(3)}in`;
+    const jpg = await toBlob(r.cv, 'image/jpeg', 0.95), outs = [];
+    if (fmt === 'pdf' || fmt === 'all') {
+      const pdf = await PDFLib.PDFDocument.create();
+      const pw = Math.round(g.W * 72 * 100) / 100, ph = Math.round(g.H * 72 * 100) / 100;
+      const page = pdf.addPage([pw, ph]), im = await pdf.embedJpg(await jpg.arrayBuffer());
+      page.drawImage(im, { x: 0, y: 0, width: pw, height: ph });
+      pdf.setTitle($('bkTitle').value + ' – cover'); const bytes = await pdf.save();
+      outs.push([new Blob([bytes], { type: 'application/pdf' }), base + '.pdf']);
+    }
+    if (fmt === 'jpg' || fmt === 'all') outs.push([await setJpegDpi(jpg, dpi), base + '.jpg']);
+    if (fmt === 'png' || fmt === 'all') outs.push([await toBlob(r.cv, 'image/png'), base + '.png']);
+    prog('cvProg', 90);
+    const L = [chk('ok', `Cover size ${g.W.toFixed(3)}" × ${g.H.toFixed(3)}" = ${r.W} × ${r.H} px at ${dpi} dpi`)];
+    if ($('cvArtInsideRed').checked) L.push(chk('ok', 'Art kept strictly inside red trim line'));
+    if (r.bc) L.push(chk('ok', 'Barcode area reserved & text-guarded'));
+    r.notes.forEach(n => L.push(chk('warn', n)));
+    $('cvCheck').innerHTML = L.join('');
+    prog('cvProg', 100); setStatus('cvStatus', '');
+    for (const [b, n] of outs) await addResult('cvRes', b, n);
+  } catch (e) { console.error(e); setStatus('cvStatus', 'Error: ' + e.message); prog('cvProg', 0); }
+  syncCoverUi();
+});
+
+/* ===================== REFLOWABLE EPUB 3 ACTIONS ===================== */
+$('epAnalyze').addEventListener('click', async () => {
+  $('epAnalyze').disabled = true;
+  try {
+    const pdf = await ensurePdfjs();
+    setStatus('epStatus', 'Reading text from ' + pdf.numPages + ' pages…');
+    const rawPages = [], fontItalicMap = {};
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n), vp = page.getViewport({ scale: 1 }), tc = await page.getTextContent();
+      const items = tc.items.filter(it => it.str && it.str.trim()).map(it => {
+        const fname = it.fontName || 'f' + n;
+        if (!(fname in fontItalicMap)) {
+          const style = tc.styles[fname], fam = (style && style.fontFamily) || '';
+          fontItalicMap[fname] = /italic|oblique/i.test(fam);
+        }
+        return { s: it.str, x: it.transform[4], y: it.transform[5], w: it.width || 0, h: it.height || 10, f: fname };
+      });
+      rawPages.push({ n, w: vp.width, h: vp.height, items });
+      if (n % 10 === 0) { prog('epProg', Math.round(n / pdf.numPages * 80)); await tick(); }
+    }
+    prog('epProg', 85); await tick();
+    setStatus('epStatus', 'Analysing book structure…');
+    const result = BookConv.analyze(rawPages, { keepFront: $('epFront').checked, fontItalic: id => fontItalicMap[id] || false });
+    S.sections = result.sections;
+    prog('epProg', 100); setStatus('epStatus', '');
+    const sections = result.sections;
+    const chapters = sections.filter(s => s.kind === 'chapter').length;
+    const parts = sections.filter(s => s.kind === 'part').length;
+    const totalWords = sections.reduce((n, s) => n + BookConv.wordCount(s), 0);
+    let html = chk('ok', `${sections.length} sections detected: ${parts} parts, ${chapters} chapters (${totalWords.toLocaleString()} words)`);
+    result.stats.warnings.forEach(w => html += chk('warn', w));
+    let list = '<div class="sec-list">';
+    sections.forEach(s => {
+      const label = s.kind === 'part' ? `PART: ${s.partLabel} – ${s.title}` : s.kind === 'chapter' ? `${s.num}. ${s.title}` : s.title;
+      list += `<div><span>${BookConv.cleanXml(label)}</span><b>${BookConv.wordCount(s).toLocaleString()} w</b></div>`;
+    });
+    list += '</div>';
+    html += `<details><summary>Show detected structure</summary>${list}</details>`;
+    $('epReport').innerHTML = html;
+    $('epBuild').disabled = false;
+  } catch (e) { console.error(e); setStatus('epStatus', 'Error: ' + e.message); prog('epProg', 0); }
+  $('epAnalyze').disabled = false;
+});
+
+$('epBuild').addEventListener('click', async () => {
+  if (!await PlayStore.ensureUnlockedForExport('Reflowable EPUB 3 Export')) return;
+  if (!S.sections) { setStatus('epStatus', 'Click "Analyse book structure" first.'); return; }
+  $('epBuild').disabled = true;
+  try {
+    let coverJpeg = null;
+    if ($('epCover').checked && S.frontCanvas) {
+      setStatus('epStatus', 'Generating cover image…');
+      await makeEbookJpg();
+      coverJpeg = S.ebookCover;
+    }
+    setStatus('epStatus', 'Building reflowable EPUB 3…'); prog('epProg', 40); await tick();
+    const result = await EpubBuild.build(JSZip, {
+      title: $('bkTitle').value, subtitle: $('bkSub').value, author: $('bkAuthor').value,
+      language: $('epLang').value, publisher: $('epPub').value, sections: S.sections, coverJpeg
+    });
+    prog('epProg', 80); await tick();
+    const valid = await EpubBuild.validate(JSZip, result.bytes);
+    prog('epProg', 100); setStatus('epStatus', '');
+    $('epReport').innerHTML = chk('ok', `Reflowable EPUB built: ${result.sections} sections, ${result.navCount} TOC entries`)
+      + chk(valid.ok ? 'ok' : 'bad', valid.ok ? 'EPUB XML validation passed' : 'XML issues: ' + valid.issues.join('; '));
+    await addResult('epRes', new Blob([result.bytes], { type: 'application/epub+zip' }), `${safeName(S.pdfName)}_reflowable.epub`);
+  } catch (e) { console.error(e); setStatus('epStatus', 'Error: ' + e.message); prog('epProg', 0); }
+  $('epBuild').disabled = false;
+});
+
+/* ===================== SAME-TO-SAME XEROX eBOOK ENGINE ===================== */
+const Xerox = (function () {
+  const state = { fileName: "", rawBuffer: null, rawKind: "", rawSource: false, pages: [], currentIndex: 0, fromMain: null };
+  const $x = id => document.getElementById(id);
+  function setStatus(msg) { $x("xrLog").textContent = msg; }
+  async function downloadBlob(content, mime, filename) { await addResult('xrRes', new Blob([content], { type: mime }), filename); }
+
+  $x("xrFile").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    $x("xrFileLabel").textContent = "Loaded: " + f.name; $x("xrFileSub").textContent = fmtBytes(f.size);
+    state.fromMain = null; handleFile(f);
+    if (/\.(pdf|docx|html?|txt)$/i.test(f.name)) routeFile(f, [f]); // same upload also feeds the Reflowable EPUB
+  });
+  $x("xrPrev").addEventListener("click", () => stepPage(-1));
+  $x("xrNext").addEventListener("click", () => stepPage(1));
+  $x("xrJumpBtn").addEventListener("click", jumpToPage);
+  $x("xrJump").addEventListener("keydown", e => { if (e.key === "Enter") jumpToPage(); });
+  $x("xrAspect").addEventListener("change", () => { if (state.rawSource) reloadCurrentSource(); });
+  $x("xrMax").addEventListener("change", () => { if (state.pages.length) compressToTargetSize(); });
+  $x("xrEpubBtn").addEventListener("click", async () => {
+    if (!await PlayStore.ensureUnlockedForExport('Same-to-Same Xerox EPUB Export')) return;
+    exportEpub();
+  });
+  $x("xrPdfBtn").addEventListener("click", async () => {
+    if (!await PlayStore.ensureUnlockedForExport('Compressed Proof PDF Export')) return;
+    exportCompressedPdf();
+  });
+  $x("xrUseLoaded").addEventListener("click", () => useLoaded(true));
+
+  async function useLoaded(force) {
+    if (!S.pdfBytes) { setStatus("Load your manuscript at the top of the page first."); return; }
+    if (!force && state.fromMain === S.pdfBytes) return;
+    state.fromMain = S.pdfBytes; state.fileName = (S.pdfName || "book") + ".pdf";
+    state.rawBuffer = S.pdfBytes; state.rawKind = "pdf"; state.rawSource = true;
+    $x("xrFileLabel").textContent = "Using manuscript: " + state.fileName;
+    await reloadCurrentSource();
+  }
+  function onManuscript() { $x("xrUseLoaded").disabled = false; }
+  function onTabOpen() { if (S.pdfBytes && (!state.rawSource || (state.fromMain && state.fromMain !== S.pdfBytes))) useLoaded(false); }
+
+  function getTargetDimensions(aspectChoice, srcW, srcH) {
+    if (aspectChoice === "5.5x8.5") return { width: 720, height: 1113 };
+    if (aspectChoice === "6x9") return { width: 720, height: 1080 };
+    if (aspectChoice === "a4") return { width: 720, height: 1018 };
+    if (srcW && srcH) { const w = 720; return { width: w, height: Math.max(400, Math.round(w * (srcH / srcW))) }; }
+    return { width: 720, height: 1113 };
+  }
+
+  function setBanner(type, text) {
+    const el = $x("xrBanner");
+    if (!text) { el.className = "xr-banner"; el.textContent = ""; return; }
+    el.className = `xr-banner ${type}`; el.textContent = text;
+  }
+
+  async function handleFile(file) {
+    state.fileName = file.name || "book";
+    state.rawBuffer = new Uint8Array(await file.arrayBuffer());
+    const ext = String(state.fileName).toLowerCase().split(".").pop();
+    state.rawKind = ["pdf", "docx", "odt", "html", "htm", "rtf", "txt"].includes(ext) ? ext : "txt";
+    state.rawSource = true;
+    await reloadCurrentSource();
+  }
+
+  async function reloadCurrentSource() {
+    if (!state.rawBuffer) return;
+    state.pages = []; state.currentIndex = 0;
+    const kind = state.rawKind, aspectChoice = $x("xrAspect").value;
+    setStatus(`Processing ${state.fileName} (${kind.toUpperCase()})...`);
+    try {
+      if (kind === "pdf") {
+        const pdf = await openPdf(state.rawBuffer);
+        const total = pdf.numPages;
+        setBanner("ok", `PDF detected (${total} pages): Locking 100% same-to-same Xerox pages (Page 1 to Page ${total}).`);
+        const baseScale = total > 240 ? 1.15 : total > 130 ? 1.4 : 1.7;
+        const quality = total > 240 ? 0.75 : total > 130 ? 0.82 : 0.88;
+        for (let p = 1; p <= total; p++) {
+          setStatus(`Rendering exact Xerox page ${p} of ${total}...`);
+          const page = await pdf.getPage(p), vp = page.getViewport({ scale: baseScale });
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(vp.width); canvas.height = Math.round(vp.height);
+          await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+          const dims = getTargetDimensions(aspectChoice, canvas.width, canvas.height);
+          const finalCanvas = document.createElement("canvas");
+          finalCanvas.width = dims.width; finalCanvas.height = dims.height;
+          const fctx = finalCanvas.getContext("2d");
+          fctx.fillStyle = "#ffffff"; fctx.fillRect(0, 0, dims.width, dims.height);
+          fctx.drawImage(canvas, 0, 0, dims.width, dims.height);
+          const dataUrl = finalCanvas.toDataURL("image/jpeg", quality);
+          state.pages.push({ dataUrl, width: dims.width, height: dims.height, html: `<img src="${dataUrl}" alt="Page ${p}" />` });
+        }
+        await compressToTargetSize();
+      } else {
+        setBanner("warn", "Non-PDF source: Rendered into fixed pages. For 1:1 print pagination, upload a PDF.");
+        const text = new TextDecoder().decode(state.rawBuffer).replace(/<[^>]+>/g, " ");
+        const dims = getTargetDimensions(aspectChoice, 720, 1113);
+        const canvas = document.createElement("canvas"); canvas.width = dims.width; canvas.height = dims.height;
+        const ctx = canvas.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, dims.width, dims.height);
+        ctx.fillStyle = "#111"; ctx.font = "14px Georgia, serif"; ctx.fillText(text.slice(0, 120), 60, 80);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        state.pages = [{ dataUrl, width: dims.width, height: dims.height, html: `<img src="${dataUrl}" alt="Page 1" />` }];
+      }
+      const hasPages = state.pages.length > 0;
+      $x("xrEpubBtn").disabled = !hasPages; $x("xrPdfBtn").disabled = !hasPages; $x("xrJumpBtn").disabled = !hasPages;
+      $x("xrJump").max = String(state.pages.length || 1);
+      renderPage();
+      setStatus(`Ready: ${state.pages.length} same-to-same page(s) | Estimated size: ~${(estimateTotalBytes() / (1024 * 1024)).toFixed(2)} MB`);
+    } catch (err) { setStatus(`Error: ${err.message}`); }
+  }
+
+  function estimateTotalBytes() {
+    let total = 8192;
+    for (const p of state.pages) if (p.dataUrl) total += Math.floor(((p.dataUrl.split(",")[1] || "").length * 3) / 4);
+    return total;
+  }
+
+  async function compressToTargetSize() {
+    const maxMb = Number($x("xrMax").value) || 50, maxBytes = maxMb * 1024 * 1024;
+    let currentBytes = estimateTotalBytes(), quality = 0.72, scale = 0.85, guard = 0;
+    while (currentBytes > maxBytes && guard < 6) {
+      guard++;
+      setStatus(`Compressing pages to stay under ${maxMb} MB (pass ${guard})...`);
+      for (let i = 0; i < state.pages.length; i++) {
+        const pg = state.pages[i]; if (!pg.dataUrl) continue;
+        const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = pg.dataUrl; });
+        const c = document.createElement("canvas");
+        c.width = Math.max(360, Math.round(img.width * scale)); c.height = Math.max(480, Math.round(img.height * scale));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        const nextUrl = c.toDataURL("image/jpeg", Math.max(0.38, quality));
+        pg.dataUrl = nextUrl; pg.width = c.width; pg.height = c.height;
+        pg.html = `<img src="${nextUrl}" alt="Page ${i + 1}" />`;
+      }
+      currentBytes = estimateTotalBytes(); quality -= 0.1; scale = Math.max(0.65, scale - 0.1);
+    }
+    renderPage();
+    setStatus(`Ready: ${state.pages.length} page(s) | Estimated size: ~${(estimateTotalBytes() / (1024 * 1024)).toFixed(2)} MB (Limit: ${maxMb} MB)`);
+  }
+
+  function stepPage(delta) {
+    const next = state.currentIndex + delta;
+    if (next >= 0 && next < state.pages.length) { state.currentIndex = next; renderPage(); }
+  }
+  function jumpToPage() {
+    const val = parseInt($x("xrJump").value, 10);
+    if (!isNaN(val) && val >= 1 && val <= state.pages.length) { state.currentIndex = val - 1; renderPage(); }
+  }
+  function renderPage() {
+    const total = state.pages.length, prevBtn = $x("xrPrev"), nextBtn = $x("xrNext"), label = $x("xrLabel"), box = $x("xrBox");
+    if (!total) { label.textContent = "Page 0 of 0"; prevBtn.disabled = true; nextBtn.disabled = true; return; }
+    const idx = Math.max(0, Math.min(state.currentIndex, total - 1));
+    state.currentIndex = idx;
+    label.textContent = `Page ${idx + 1} of ${total}`; $x("xrJump").value = String(idx + 1);
+    prevBtn.disabled = idx === 0; nextBtn.disabled = idx === total - 1;
+    const pg = state.pages[idx], maxPreviewW = Math.min(460, pg.width), previewH = Math.round(pg.height * (maxPreviewW / pg.width));
+    box.innerHTML = `<div class="xr-sheet" style="width:${maxPreviewW}px;height:${previewH}px;">${pg.html}</div>`;
+    box.scrollTop = 0;
+  }
+
+  function exportEpub() {
+    if (!state.pages.length) return;
+    const title = ($("bkTitle").value || "Book").trim(), author = ($("bkAuthor").value || "Author").trim();
+    const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const strBytes = str => new TextEncoder().encode(str);
+    const dataUrlToBytes = url => { const b64 = url.split(",")[1] || "", bin = atob(b64), out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; };
+    const entries = [
+      { name: "mimetype", data: strBytes("application/epub+zip") },
+      { name: "META-INF/container.xml", data: strBytes(`<?xml version="1.0" encoding="UTF-8"?>\n<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n  <rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles>\n</container>`) }
+    ];
+    const manifest = [`<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>`], spine = [], navMap = [];
+    state.pages.forEach((pg, idx) => {
+      const n = idx + 1, pageFile = `page_${n}.xhtml`, imgPath = `images/p_${n}.jpg`;
+      entries.push({ name: `OEBPS/${imgPath}`, data: pg.dataUrl ? dataUrlToBytes(pg.dataUrl) : strBytes("") });
+      manifest.push(`<item id="img_${n}" href="${imgPath}" media-type="image/jpeg"/>`);
+      const xhtml = `<?xml version="1.0" encoding="UTF-8"?>\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head><title>Page ${n}</title><meta name="viewport" content="width=${pg.width}, height=${pg.height}"/></head>\n<body style="margin:0;padding:0;width:${pg.width}px;height:${pg.height}px;"><img src="${imgPath}" alt="Page ${n}" style="width:${pg.width}px;height:${pg.height}px;display:block;"/></body>\n</html>`;
+      entries.push({ name: `OEBPS/${pageFile}`, data: strBytes(xhtml) });
+      manifest.push(`<item id="page_${n}" href="${pageFile}" media-type="application/xhtml+xml"/>`);
+      spine.push(`<itemref idref="page_${n}"/>`);
+      navMap.push(`<navPoint id="np_${n}" playOrder="${n}"><navLabel><text>Page ${n}</text></navLabel><content src="${pageFile}"/></navPoint>`);
+    });
+    const opf = `<?xml version="1.0" encoding="UTF-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="3.0">\n  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n    <dc:identifier id="BookId">urn:uuid:xerox-${Date.now()}</dc:identifier>\n    <dc:title>${esc(title)}</dc:title>\n    <dc:creator>${esc(author)}</dc:creator>\n    <dc:language>${esc($x("xrLang").value.trim() || "en")}</dc:language>\n    <meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d+Z$/, "Z")}</meta>\n    <meta property="rendition:layout">pre-paginated</meta>\n    <meta property="rendition:spread">none</meta>\n  </metadata>\n  <manifest>${manifest.join("\n")}</manifest>\n  <spine toc="ncx">${spine.join("\n")}</spine>\n</package>`;
+    const ncx = `<?xml version="1.0" encoding="UTF-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">\n  <head><meta name="dtb:uid" content="xerox-book"/></head>\n  <docTitle><text>${esc(title)}</text></docTitle>\n  <navMap>${navMap.join("\n")}</navMap>\n</ncx>`;
+    entries.push({ name: "OEBPS/content.opf", data: strBytes(opf) }, { name: "OEBPS/toc.ncx", data: strBytes(ncx) });
+    const table = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) { let c = i; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1); table[i] = c >>> 0; }
+    const crc32 = bytes => { let c = 0xffffffff; for (let i = 0; i < bytes.length; i++) c = table[(c ^ bytes[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+    const localParts = [], centralParts = []; let offset = 0;
+    for (const entry of entries) {
+      const nameBytes = strBytes(entry.name), data = entry.data, crc = crc32(data);
+      const lh = new Uint8Array(30 + nameBytes.length), lv = new DataView(lh.buffer);
+      lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint32(14, crc, true);
+      lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true); lv.setUint16(26, nameBytes.length, true);
+      lh.set(nameBytes, 30); localParts.push(lh, data);
+      const ch = new Uint8Array(46 + nameBytes.length), cv = new DataView(ch.buffer);
+      cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint32(16, crc, true);
+      cv.setUint32(20, data.length, true); cv.setUint32(24, data.length, true); cv.setUint16(28, nameBytes.length, true); cv.setUint32(42, offset, true);
+      ch.set(nameBytes, 46); centralParts.push(ch); offset += lh.length + data.length;
+    }
+    const centralSize = centralParts.reduce((s, p) => s + p.length, 0), eocd = new Uint8Array(22), ev = new DataView(eocd.buffer);
+    ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, entries.length, true); ev.setUint16(10, entries.length, true);
+    ev.setUint32(12, centralSize, true); ev.setUint32(16, offset, true);
+    const all = [...localParts, ...centralParts, eocd], out = new Uint8Array(all.reduce((s, a) => s + a.length, 0));
+    let pos = 0; for (const part of all) { out.set(part, pos); pos += part.length; }
+    const outName = `${safeName(title)}-same-to-same-${state.pages.length}p.epub`;
+    downloadBlob(out, "application/epub+zip", outName);
+    setStatus(`Exported ${outName} (${(out.length / (1024 * 1024)).toFixed(2)} MB, ${state.pages.length} pages).`);
+  }
+
+  function exportCompressedPdf() {
+    if (!state.pages.length) return;
+    const strBytes = str => new TextEncoder().encode(str);
+    const dataUrlToBytes = url => { const b64 = url.split(",")[1] || "", bin = atob(b64), out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; };
+    const chunks = [], offsets = [0]; let pos = 0;
+    const push = s => { const b = typeof s === "string" ? strBytes(s) : s; chunks.push(b); pos += b.length; };
+    push("%PDF-1.4\n");
+    const totalPages = state.pages.length, pageObjIds = [], pageEntries = [];
+    for (let i = 0; i < totalPages; i++) {
+      const pg = state.pages[i], jpgBytes = pg.dataUrl ? dataUrlToBytes(pg.dataUrl) : new Uint8Array(0);
+      const wPt = Math.round((pg.width * 72) / 96), hPt = Math.round((pg.height * 72) / 96);
+      const imgObjId = 3 + i * 3, contentObjId = 4 + i * 3, pageObjId = 5 + i * 3;
+      pageObjIds.push(pageObjId);
+      pageEntries.push({ imgObjId, contentObjId, pageObjId, wPx: pg.width, hPx: pg.height, wPt, hPt, jpgBytes, streamBytes: strBytes(`q ${wPt} 0 0 ${hPt} 0 0 cm /Im${i + 1} Do Q\n`), idx: i + 1 });
+    }
+    const maxObjId = 2 + totalPages * 3, objMap = new Map();
+    objMap.set(1, strBytes(`1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`));
+    objMap.set(2, strBytes(`2 0 obj\n<< /Type /Pages /Kids [${pageObjIds.map(id => `${id} 0 R`).join(" ")}] /Count ${totalPages} >>\nendobj\n`));
+    for (const pe of pageEntries) {
+      const imgHeader = strBytes(`${pe.imgObjId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${pe.wPx} /Height ${pe.hPx} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pe.jpgBytes.length} >>\nstream\n`);
+      const imgFooter = strBytes(`\nendstream\nendobj\n`);
+      const fullImg = new Uint8Array(imgHeader.length + pe.jpgBytes.length + imgFooter.length);
+      fullImg.set(imgHeader, 0); fullImg.set(pe.jpgBytes, imgHeader.length); fullImg.set(imgFooter, imgHeader.length + pe.jpgBytes.length);
+      objMap.set(pe.imgObjId, fullImg);
+      const cHeader = strBytes(`${pe.contentObjId} 0 obj\n<< /Length ${pe.streamBytes.length} >>\nstream\n`), cFooter = strBytes(`endstream\nendobj\n`);
+      const fullContent = new Uint8Array(cHeader.length + pe.streamBytes.length + cFooter.length);
+      fullContent.set(cHeader, 0); fullContent.set(pe.streamBytes, cHeader.length); fullContent.set(cFooter, cHeader.length + pe.streamBytes.length);
+      objMap.set(pe.contentObjId, fullContent);
+      objMap.set(pe.pageObjId, strBytes(`${pe.pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pe.wPt} ${pe.hPt}] /Resources << /XObject << /Im${pe.idx} ${pe.imgObjId} 0 R >> >> /Contents ${pe.contentObjId} 0 R >>\nendobj\n`));
+    }
+    for (let id = 1; id <= maxObjId; id++) { offsets[id] = pos; push(objMap.get(id)); }
+    const xrefStart = pos;
+    push(`xref\n0 ${maxObjId + 1}\n0000000000 65535 f \n`);
+    for (let id = 1; id <= maxObjId; id++) push(`${String(offsets[id]).padStart(10, "0")} 00000 n \n`);
+    push(`trailer\n<< /Size ${maxObjId + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`);
+    const out = new Uint8Array(chunks.reduce((s, b) => s + b.length, 0));
+    let cursor = 0; for (const b of chunks) { out.set(b, cursor); cursor += b.length; }
+    const title = ($("bkTitle").value || "book").trim();
+    const outName = `${safeName(title)}-compressed-${totalPages}p.pdf`;
+    downloadBlob(out, "application/pdf", outName);
+    setStatus(`Exported ${outName} (${(out.length / (1024 * 1024)).toFixed(2)} MB, ${totalPages} pages).`);
+  }
+  return { onManuscript, onTabOpen, useLoaded };
+})();
+
+/* ===================== INITIALIZE ===================== */
+PlayStore.init();
+loadLibs().then(() => { syncCoverUi(); syncCustomBoxes(); renderSwatches(); if (S.pdfBytes) Xerox.onManuscript(); });
+</script>
+<script>
+/* ===== Organise: show only what each tab needs ===== */
+const TAB_INFO = {
+  pre:  { h: 'Your book – files to check', note: 'Load everything once; Pre-flight checks it all.' },
+  int:  { h: 'Your manuscript', note: 'Manuscript tab: only the manuscript file is needed here.' },
+  cov:  { h: 'Your cover art & book details', note: 'Cover tab: front art, back art and title / author. Pages come from the manuscript if loaded.' },
+  epub: { h: 'Book details', note: 'Upload your manuscript in the eBook box below (one upload serves both eBook types). The cover comes from Cover Studio.' },
+  rules:{ h: '', note: '' }
+};
+function organiseTab(tab) {
+  const shared = $('sharedBook'); if (!shared) return;
+  shared.style.display = tab === 'rules' ? 'none' : '';
+  shared.querySelectorAll('[data-for]').forEach(el => { el.style.display = el.dataset.for.split(' ').includes(tab) ? '' : 'none'; });
+  const info = TAB_INFO[tab] || {};
+  $('sharedTitle').textContent = info.h || '';
+  $('sharedNote').textContent = info.note || '';
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => organiseTab(t.dataset.t)));
+// Cover tab: cards collapse; only the first two start open
+document.querySelectorAll('#p-cov > .card').forEach((card, i, all) => {
+  card.classList.add('collapsible'); if (i > 1 && i < all.length - 1) card.classList.add('closed');
+  card.querySelector('h3').addEventListener('click', () => card.classList.toggle('closed'));
+});
+organiseTab('pre');
+</script>
+<script>if("serviceWorker" in navigator&&location.protocol.startsWith("http")){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body>
+</html>
